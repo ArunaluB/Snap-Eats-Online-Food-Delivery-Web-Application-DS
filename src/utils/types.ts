@@ -1,6 +1,6 @@
 
 export interface Order {
-  id: string;
+  id: number;
   lat: number;
   lng: number;
   customerName: string;
@@ -11,9 +11,10 @@ export interface Order {
   destination: string;
   customerLat: number;
   customerLng: number;
-  distance: string;
+  distance: number;
   amount: string;
   status: string;
+  distanceToShop:number;
   estimatedMinutes?: number;
 }
 

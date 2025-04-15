@@ -14,6 +14,26 @@ import OrderDetails from './OrderDetails';
 import CompletedToast from './CompletedToast';
 import MapComponent from './MapComponent';
 import { getDirections, TurnInstruction } from '../utils/routeService';
+import { getDistance, getEstimatedTravelTime, estimateRouteInfo } from '../utils/routeService';
+import { OrderStore } from '../utils/OrderStore';
+
+
+// Update these imports at the top of your Dashboard component
+import { OrderTrackingService } from '../utils/OrderTrackingService';
+// Add OrderStatsContext to share stats between components
+import { createContext, useContext } from 'react';
+
+// Create a context for order stats
+export const OrderStatsContext = createContext({
+  stats: {
+    todayOrders: 0,
+    todayDistance: 0,
+    weeklyOrders: 0,
+    weeklyDistance: 0
+  },
+  updateStats: (newStats: any) => { }
+});
+
 const WEBSOCKET_BASE_URL = 'ws://localhost:8080/api/drivermanager';
 const DRIVER_LOCATION_WEBSOCKET = `${WEBSOCKET_BASE_URL}/ws/driver-location`;
 let locationSocket: WebSocket | null = new WebSocket(DRIVER_LOCATION_WEBSOCKET);
@@ -81,6 +101,26 @@ export default function Dashboard() {
       status: 'pending'
     }
   ]);
+  const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiYXJ1bmFsdSIsImEiOiJjbTllZ3ZleHUxZWlxMmxzN3hyMmlxaXBjIn0.88xrwVeZkSlah-fUY3_3BA';
+  let latestOrder: Order | null = null;
+  // Add this state to your component
+  const [stats, setStats] = useState({
+    todayOrders: 0,
+    todayDistance: 0,
+    weeklyOrders: 0,
+    weeklyDistance: 0
+  });
+
+  // Add this useEffect to load stats on component mount
+  useEffect(() => {
+    const currentStats = OrderTrackingService.getStats();
+    setStats({
+      todayOrders: currentStats.todayOrders,
+      todayDistance: currentStats.todayDistance,
+      weeklyOrders: currentStats.weeklyOrders,
+      weeklyDistance: currentStats.weeklyDistance
+    });
+  }, []);
 
   // Function to send location updates to the server
   const sendLocationUpdate = useCallback(() => {
@@ -455,6 +495,7 @@ export default function Dashboard() {
     if (isOnline) {
       // Initialize STOMP client for order notifications
       const socket = new SockJS('http://localhost:8080/api/drivermanager/ws-delivery');
+
       const client = new Client({
         webSocketFactory: () => socket,
         debug: (str) => {
@@ -467,15 +508,43 @@ export default function Dashboard() {
 
       client.onConnect = () => {
         console.log('Connected to STOMP WebSocket');
-        client.subscribe(`/queue/driver/${driverId}/orders`, (message) => {
+        client.subscribe(`/queue/driver/${driverId}/orders`, async (message) => {
           try {
             const orderData = JSON.parse(message.body);
             console.log('Received new order data:', orderData);
 
+
             // Extract order and additional info
             const order = orderData.order || orderData;
-            const distanceKm = orderData.distanceKm;
-            const estimatedMinutes = orderData.estimatedMinutes;
+
+
+            // Calculate distanceToShop (from shop to customer)
+            const distanceToShop = await getDistance(
+              currentLocation.lng,  // Driver's current longitude
+              currentLocation.lat,
+              order.customerLat,
+              order.customerLat,
+              MAPBOX_ACCESS_TOKEN
+            );
+            // Calculate distanceToShop (from shop to customer)
+            const distance = await getDistance(
+              currentLocation.lng,
+              currentLocation.lat,
+              order.customerLat,
+              order.customerLat,
+              MAPBOX_ACCESS_TOKEN
+            );
+
+            // Calculate estimatedTimeToShop (time from shop to customer)
+            const estimatedTimeToShop = await getEstimatedTravelTime(
+              order.shopLng,
+              order.shopLat,
+              order.customerLat,
+              order.customerLat,
+              MAPBOX_ACCESS_TOKEN
+            );
+            console.log(estimatedTimeToShop);
+            console.log(distance);
 
             // Convert backend order to frontend format
             const newOrder: Order = {
@@ -490,10 +559,11 @@ export default function Dashboard() {
               destination: order.deliveryAddress || 'Destination',
               customerLat: order.customerLat,
               customerLng: order.customerLng,
-              distance: `${distanceKm ? distanceKm.toFixed(1) : (order.distance || 0).toFixed(1)} km`,
+              distance: parseFloat(((distance || 0) / 1000).toFixed(2)),
               amount: `LKR ${order.amount || 0}`,
               status: order.status || 'pending',
-              estimatedMinutes: estimatedMinutes || undefined
+              distanceToShop: distanceToShop || 0,
+              estimatedMinutes: estimatedTimeToShop || undefined
             };
 
             // Add to nearby orders
@@ -527,6 +597,7 @@ export default function Dashboard() {
 
       client.activate();
       setStompClient(client);
+
 
       // Initialize raw WebSocket for location updates
       const locSocket = new WebSocket(DRIVER_LOCATION_WEBSOCKET);
@@ -738,7 +809,7 @@ export default function Dashboard() {
       setSelectedOrder(order);
       setOrderStatus('accepted');
       setShowOrderDetails(true);
-  
+
       // Create a destination for the shop
       const shopDestination = {
         lat: order.shopLat,
@@ -746,22 +817,34 @@ export default function Dashboard() {
         name: order.shop
       };
       setDestination(shopDestination);
-  
+
       // Fetch directions to the shop
       fetchDirections(
         { lat: currentLocation.lat, lng: currentLocation.lng },
         { lat: order.shopLat, lng: order.shopLng }
       );
-  
-      // UPDATED: Changed the destination path to match the new endpoint
+
       stompClient.publish({
-        destination: `/app/orders/driver-response`,
+        destination: `/app/driver/response`,
         body: JSON.stringify({
-          id: order.id,
-          status: 'ACCEPTED'
+          orderId: order.id,
+          driverId: driverId,
+          accepted: true
         })
       });
-  
+
+
+
+      console.log('Order accepted:', order.id);
+      stompClient.publish({
+        destination: `/app/orders/orders-details`,
+        body: JSON.stringify({
+          id: order.id,
+          distance: order.distance,
+          distanceToShop: order.distanceToShop,
+          estimatedTimeToShop: order.estimatedMinutes,
+        })
+      });
       // Remove the order from nearby orders
       setNearbyOrders(prevOrders =>
         prevOrders.filter(o => o.id !== order.id)
@@ -817,7 +900,7 @@ export default function Dashboard() {
   //   };
   //   setDestination(customerDestination);
 
-    
+
 
   //   // Fetch directions to the customer
   //   fetchDirections(
@@ -825,48 +908,48 @@ export default function Dashboard() {
   //     { lat: selectedOrder.customerLat, lng: selectedOrder.customerLng }
   //   );
 
-    
+
   // };
   // Update your confirmPickup function
-const confirmPickup = () => {
-  if (!selectedOrder) return;
+  const confirmPickup = () => {
+    if (!selectedOrder) return;
 
-  // Update order status
-  setOrderStatus('pickup');
+    // Update order status
+    setOrderStatus('pickup');
 
-  // Update the order in the list
-  const updatedOrders = nearbyOrders.map(order =>
-    order.id === selectedOrder.id
-      ? { ...order, status: 'pickup' }
-      : order
-  );
-  setNearbyOrders(updatedOrders);
+    // Update the order in the list
+    const updatedOrders = nearbyOrders.map(order =>
+      order.id === selectedOrder.id
+        ? { ...order, status: 'pickup' }
+        : order
+    );
+    setNearbyOrders(updatedOrders);
 
-  // Set customer as destination and calculate directions
-  const customerDestination = {
-    lat: selectedOrder.customerLat,
-    lng: selectedOrder.customerLng,
-    name: selectedOrder.destination
+    // Set customer as destination and calculate directions
+    const customerDestination = {
+      lat: selectedOrder.customerLat,
+      lng: selectedOrder.customerLng,
+      name: selectedOrder.destination
+    };
+    setDestination(customerDestination);
+
+    // UPDATED: Send pickup confirmation to server
+    if (stompClient && stompClient.active) {
+      stompClient.publish({
+        destination: `/app/orders/driver-response`,
+        body: JSON.stringify({
+          id: selectedOrder.id,
+          status: 'PICKED_UP'
+        })
+      });
+    }
+
+    // Fetch directions to the customer
+    fetchDirections(
+      { lat: currentLocation.lat, lng: currentLocation.lng },
+      { lat: selectedOrder.customerLat, lng: selectedOrder.customerLng }
+    );
   };
-  setDestination(customerDestination);
-
-  // UPDATED: Send pickup confirmation to server
-  if (stompClient && stompClient.active) {
-    stompClient.publish({
-      destination: `/app/orders/driver-response`,
-      body: JSON.stringify({
-        id: selectedOrder.id,
-        status: 'PICKED_UP'
-      })
-    });
-  }
-
-  // Fetch directions to the customer
-  fetchDirections(
-    { lat: currentLocation.lat, lng: currentLocation.lng },
-    { lat: selectedOrder.customerLat, lng: selectedOrder.customerLng }
-  );
-};
 
   // // Complete delivery
   // const completeDelivery = () => {
@@ -890,38 +973,54 @@ const confirmPickup = () => {
   //   setShowOrderDetails(false);
   // };
   // Complete delivery function
-const completeDelivery = () => {
-  if (!selectedOrder) return;
+  const completeDelivery = () => {
+    if (!selectedOrder) return;
 
-  // Update order status
-  setOrderStatus('completed');
+    // Update order status
+    setOrderStatus('completed');
 
-  // UPDATED: Send completed status to server
-  if (stompClient && stompClient.active) {
-    stompClient.publish({
-      destination: `/app/orders/driver-response`,
-      body: JSON.stringify({
-        id: selectedOrder.id,
-      
-        status: 'DELIVERED'
-      })
-    });
-  }
+    // UPDATED: Send completed status to server
+    if (stompClient && stompClient.active) {
+      stompClient.publish({
+        destination: `/app/orders/driver-response`,
+        body: JSON.stringify({
+          id: selectedOrder.id,
 
-  // Update the order in the list
-  const updatedOrders = nearbyOrders.filter(order =>
-    order.id !== selectedOrder.id
-  );
-  setNearbyOrders(updatedOrders);
+          status: 'DELIVERED'
+        })
+      });
+    }
+    // Record the completed order in stats
+    const distanceKm = typeof selectedOrder.distance === 'string'
+      ? parseFloat(selectedOrder.distance.replace(' km', ''))
+      : selectedOrder.distance || 0;
 
-  // Clear directions and destination
-  setRoute(null);
-  setDestination(null);
-  setIsMapFullscreen(false);
+    const updatedStats = OrderTrackingService.recordCompletedOrder(distanceKm);
 
-  // Close order details
-  setShowOrderDetails(false);
-};
+    // Update the stats state if you're using it elsewhere
+    setStats(updatedStats); // Make sure to add this state with useState
+
+    // Record earnings
+  const orderAmount = typeof selectedOrder.amount === 'string'
+  ? parseFloat(selectedOrder.amount.replace('LKR ', ''))
+  : selectedOrder.amount || 0;
+  
+// Store the earnings
+OrderStore.addOrderEarnings(selectedOrder.id, orderAmount); 
+    // Update the order in the list
+    const updatedOrders = nearbyOrders.filter(order =>
+      order.id !== selectedOrder.id
+    );
+    setNearbyOrders(updatedOrders);
+
+    // Clear directions and destination
+    setRoute(null);
+    setDestination(null);
+    setIsMapFullscreen(false);
+
+    // Close order details
+    setShowOrderDetails(false);
+  };
 
   // // Cancel order
   // const cancelOrder = (order: Order) => {
@@ -944,143 +1043,149 @@ const completeDelivery = () => {
   // };
 
   // Cancel order
-const cancelOrder = (order: Order) => {
-  if (stompClient && stompClient.active) {
-    // UPDATED: Send rejection message back to server with new endpoint and status
-    stompClient.publish({
-      destination: `/app/orders/driver-response`,
-      body: JSON.stringify({
-        id: order.id,
-        
-        status: 'REJECTED'
-      })
-    });
+  const cancelOrder = (order: Order) => {
+    if (stompClient && stompClient.active) {
+      // UPDATED: Send rejection message back to server with new endpoint and status
+      stompClient.publish({
+        destination: `/app/orders/driver-response`,
+        body: JSON.stringify({
+          id: order.id,
 
-    // Remove the order from nearby orders
-    setNearbyOrders(prevOrders =>
-      prevOrders.filter(o => o.id !== order.id)
-    );
-  }
-};
+          status: 'REJECTED'
+        })
+      });
+
+      // Remove the order from nearby orders
+      setNearbyOrders(prevOrders =>
+        prevOrders.filter(o => o.id !== order.id)
+      );
+    }
+  };
 
 
   return (
-    <div className="bg-gray-100 min-h-screen pb-16">
-      {/* Header with profile and earnings (hidden when map is fullscreen) */}
-      {!isMapFullscreen && (
-        <Header />
-      )}
+    <OrderStatsContext.Provider value={{ stats, updateStats: setStats }}>
+      <div className="bg-gray-100 min-h-screen pb-16">
+        {/* Header with profile and earnings (hidden when map is fullscreen) */}
+        {!isMapFullscreen && (
+          <Header />
+        )}
 
-      {/* Map Section - Full screen when isMapFullscreen is true */}
-      <div className={`relative ${isMapFullscreen ? 'h-screen fixed inset-0 z-40' : 'h-72'}`}>
-        {/* Map Component */}
-        <MapComponent
-          viewState={viewState}
-          setViewState={setViewState}
-          currentLocation={currentLocation}
-          destination={destination}
-          customerLat={selectedOrder?.customerLat}
-          customerLng={selectedOrder?.customerLng}
-          route={route ? { type: 'FeatureCollection', features: [route] } : null}
-          isOnline={isOnline}
-          nearbyOrders={nearbyOrders}
-          handleOrderClick={handleOrderClick}
-          selectedOrder={selectedOrder}
-          orderStatus={orderStatus}
-          popupInfo={popupInfo}
-          setPopupInfo={setPopupInfo}
-          isMapFullscreen={isMapFullscreen}
-          setIsMapFullscreen={setIsMapFullscreen}
-          routeInstructions={routeInstructions}
-        />
+        {/* Map Section - Full screen when isMapFullscreen is true */}
+        <div className={`relative ${isMapFullscreen ? 'h-screen fixed inset-0 z-40' : 'h-72'}`}>
+          {/* Map Component */}
+          <MapComponent
+            viewState={viewState}
+            setViewState={setViewState}
+            currentLocation={currentLocation}
+            destination={destination}
+            customerLat={selectedOrder?.customerLat}
+            customerLng={selectedOrder?.customerLng}
+            route={route ? { type: 'FeatureCollection', features: [route] } : null}
+            isOnline={isOnline}
+            nearbyOrders={nearbyOrders}
+            handleOrderClick={handleOrderClick}
+            selectedOrder={selectedOrder}
+            orderStatus={orderStatus}
+            popupInfo={popupInfo}
+            setPopupInfo={setPopupInfo}
+            isMapFullscreen={isMapFullscreen}
+            setIsMapFullscreen={setIsMapFullscreen}
+            routeInstructions={routeInstructions}
+          />
 
 
-        {/* Status toggle - visible in both normal and fullscreen mode */}
-        <StatusToggle
-          isOnline={isOnline}
-          toggleStatus={toggleStatus}
-        />
+          {/* Status toggle - visible in both normal and fullscreen mode */}
+          <StatusToggle
+            isOnline={isOnline}
+            toggleStatus={toggleStatus}
+          />
 
-        {/* Active Order Status Bar */}
-        {selectedOrder && orderStatus !== 'pending' && (
-          <div className="absolute top-4 left-4 right-16 bg-white p-3 rounded-lg shadow-lg z-20">
-            <div className="flex justify-between items-center">
-              <div>
-                <span className="text-xs uppercase font-bold text-gray-500">Current Order</span>
-                <h3 className="font-medium">
-                  {orderStatus === 'accepted' ? selectedOrder.shop : selectedOrder.customerName}
-                </h3>
+          {/* Active Order Status Bar */}
+          {selectedOrder && orderStatus !== 'pending' && (
+            <div className="absolute top-4 left-4 right-16 bg-white p-3 rounded-lg shadow-lg z-20">
+              <div className="flex justify-between items-center">
+                <div>
+                  <span className="text-xs uppercase font-bold text-gray-500">Current Order</span>
+                  <h3 className="font-medium">
+                    {orderStatus === 'accepted' ? selectedOrder.shop : selectedOrder.customerName}
+                  </h3>
+                </div>
+                <div className="flex">
+                  <button
+                    onClick={() => setShowOrderDetails(true)}
+                    className="bg-green-500 text-white p-2 rounded-lg mr-2 hover:bg-green-600 transition-colors"
+                    aria-label="Show order details"
+                  >
+                    <Check className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => cancelOrder(selectedOrder)}
+                    className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors"
+                    aria-label="Cancel order"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
-              <div className="flex">
-                <button
-                  onClick={() => setShowOrderDetails(true)}
-                  className="bg-green-500 text-white p-2 rounded-lg mr-2 hover:bg-green-600 transition-colors"
-                  aria-label="Show order details"
-                >
-                  <Check className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => cancelOrder(selectedOrder)}
-                  className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors"
-                  aria-label="Cancel order"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+            </div>
+          )}
+        </div>
+
+        {/* Content sections - Hidden when map is fullscreen */}
+        {!isMapFullscreen && (
+          <>
+            {/* Stats Section */}
+            <OrderStats />
+            {/* Weekly Incentive */}
+            <IncentiveCard />
+            {/* Recent Orders */}
+            <RecentOrders
+              isOnline={isOnline}
+              nearbyOrders={nearbyOrders.map(({ id, shop, distance, amount }) => ({ id, shop, distance, amount }))}
+              handleOrderClick={({ id, shop, distance, amount }) => {
+                const order = nearbyOrders.find(o => o.id === id);
+                if (order) {
+                  handleOrderClick(order);
+                }
+              }}
+            />
+          </>
+        )}
+        {/* Order Details Modal */}
+        {showOrderDetails && selectedOrder && (
+          <OrderDetails
+            selectedOrder={selectedOrder}
+            orderStatus={orderStatus}
+            setShowOrderDetails={setShowOrderDetails}
+            acceptOrder={acceptOrder}
+            confirmPickup={confirmPickup}
+            completeDelivery={completeDelivery}
+            cancelOrder={cancelOrder}
+          />
+        )}
+
+        {/* Completed Order Toast Notification */}
+        {orderStatus === 'completed' && (
+          <CompletedToast setOrderStatus={setOrderStatus} />
+        )}
+
+        {isLoadingRoute && (
+          <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+            <div className="bg-white p-4 rounded-lg shadow-lg">
+              <p className="text-center">Calculating best route...</p>
+              <div className="mt-2 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-full bg-blue-500 animate-pulse"></div>
               </div>
             </div>
           </div>
         )}
+
       </div>
-
-      {/* Content sections - Hidden when map is fullscreen */}
-      {!isMapFullscreen && (
-        <>
-          {/* Stats Section */}
-          <OrderStats />
-          {/* Weekly Incentive */}
-          <IncentiveCard />
-          {/* Recent Orders */}
-          <RecentOrders
-            isOnline={isOnline}
-            nearbyOrders={nearbyOrders.map(({ id, shop, distance, amount }) => ({ id, shop, distance, amount }))}
-            handleOrderClick={({ id, shop, distance, amount }) => {
-              const order = nearbyOrders.find(o => o.id === id);
-              if (order) {
-                handleOrderClick(order);
-              }
-            }}
-          />
-        </>
-      )}
-      {/* Order Details Modal */}
-      {showOrderDetails && selectedOrder && (
-        <OrderDetails
-          selectedOrder={selectedOrder}
-          orderStatus={orderStatus}
-          setShowOrderDetails={setShowOrderDetails}
-          acceptOrder={acceptOrder}
-          confirmPickup={confirmPickup}
-          completeDelivery={completeDelivery}
-          cancelOrder={cancelOrder}
-        />
-      )}
-
-      {/* Completed Order Toast Notification */}
-      {orderStatus === 'completed' && (
-        <CompletedToast setOrderStatus={setOrderStatus} />
-      )}
-
-      {isLoadingRoute && (
-        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg shadow-lg">
-            <p className="text-center">Calculating best route...</p>
-            <div className="mt-2 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-500 animate-pulse"></div>
-            </div>
-          </div>
-        </div>
-      )}
-
-    </div>
+    </OrderStatsContext.Provider>
   );
 }
+function setStats(updatedStats: { todayOrders: number; todayDistance: number; weeklyOrders: number; weeklyDistance: number }) {
+  throw new Error('Function not implemented.');
+}
+
