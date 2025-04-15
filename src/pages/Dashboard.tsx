@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { MapIcon, PackageIcon, Clock, DollarSign, PowerIcon, Phone, Navigation, User, X, Check } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import type { Feature,LineString } from 'geojson';
+import type { Feature, LineString } from 'geojson';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { Order, Location, Destination, PopupInfo } from '../utils/types';
@@ -12,6 +12,7 @@ import Header from './Header';
 import StatusToggle from './StatusToggle';
 import OrderDetails from './OrderDetails';
 import CompletedToast from './CompletedToast';
+import MapComponent from './MapComponent';
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiYXJ1bmFsdSIsImEiOiJjbTllZ3ZleHUxZWlxMmxzN3hyMmlxaXBjIn0.88xrwVeZkSlah-fUY3_3BA';
 const WEBSOCKET_BASE_URL = 'ws://localhost:8080/api/drivermanager';
 const DRIVER_LOCATION_WEBSOCKET = `${WEBSOCKET_BASE_URL}/ws/driver-location`;
@@ -743,11 +744,29 @@ export default function Dashboard() {
 
       {/* Map Section - Full screen when isMapFullscreen is true */}
       <div className={`relative ${isMapFullscreen ? 'h-screen fixed inset-0 z-40' : 'h-72'}`}>
+        {/* Map Component */}
+        <MapComponent
+          viewState={viewState}
+          setViewState={setViewState}
+          currentLocation={currentLocation}
+          destination={destination}
+          route={route ? { type: 'FeatureCollection', features: [route] } : null}
+          isOnline={isOnline}
+          nearbyOrders={nearbyOrders}
+          handleOrderClick={handleOrderClick}
+          selectedOrder={selectedOrder}
+          orderStatus={orderStatus}
+          popupInfo={popupInfo}
+          setPopupInfo={setPopupInfo}
+          isMapFullscreen={isMapFullscreen}
+        />
+
         {/* Status toggle - visible in both normal and fullscreen mode */}
         <StatusToggle
           isOnline={isOnline}
           toggleStatus={toggleStatus}
         />
+
         {/* Active Order Status Bar */}
         {selectedOrder && orderStatus !== 'pending' && (
           <div className="absolute top-4 left-4 right-16 bg-white p-3 rounded-lg shadow-lg z-20">
