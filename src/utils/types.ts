@@ -52,6 +52,7 @@ export interface PopupInfo extends Location {
 }
 
 import { Feature, LineString } from 'geojson';
+import { ReactNode } from 'react';
 
 export interface Location {
   lat: number;

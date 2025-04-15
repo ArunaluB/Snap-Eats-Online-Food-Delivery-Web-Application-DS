@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Map, {
   Marker,
   NavigationControl,
@@ -10,7 +10,8 @@ import Map, {
   ViewStateChangeEvent,
 } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { MapIcon, Navigation, Package } from 'lucide-react';
+import { MapIcon, Navigation, Package, ChevronDown, ChevronUp, MapPinHouse } from 'lucide-react';
+import { TurnInstruction } from '../utils/routeService';
 
 // Type definitions
 type Coordinates = {
@@ -48,6 +49,7 @@ type MapComponentProps = {
   setPopupInfo: (order: Order | null) => void;
   isMapFullscreen: boolean;
   setIsMapFullscreen: (value: boolean) => void;
+  routeInstructions?: TurnInstruction[];
 };
 
 const MapComponent: React.FC<MapComponentProps> = ({
@@ -64,28 +66,51 @@ const MapComponent: React.FC<MapComponentProps> = ({
   popupInfo,
   setPopupInfo,
   isMapFullscreen,
-  setIsMapFullscreen
+  setIsMapFullscreen,
+  routeInstructions = []
 }) => {
   const mapRef = useRef<MapRef>(null);
+  const [showDirections, setShowDirections] = useState(true);
 
   const MAPBOX_ACCESS_TOKEN =
     'pk.eyJ1IjoiYXJ1bmFsdSIsImEiOiJjbTllZ3ZleHUxZWlxMmxzN3hyMmlxaXBjIn0.88xrwVeZkSlah-fUY3_3BA';
 
   const routeLayerStyle: mapboxgl.LineLayer = {
-      id: 'route',
-      type: 'line',
-      layout: {
-          'line-join': 'round',
-          'line-cap': 'round',
-      },
-      paint: {
-          'line-color': '#3887be',
-          'line-width': 5,
-          'line-opacity': 0.75,
-      },
-      source: ''
+    id: 'route',
+    type: 'line',
+    layout: {
+      'line-join': 'round',
+      'line-cap': 'round',
+    },
+    paint: {
+      'line-color': '#3887be',
+      'line-width': 5,
+      'line-opacity': 0.75,
+    },
+    source: ''
   };
-
+  const getManeuverIcon = (maneuver: string, modifier?: string) => {
+    switch (maneuver) {
+      case 'turn':
+        if (modifier === 'right') return '↗️';
+        if (modifier === 'left') return '↖️';
+        return '↪️';
+      case 'straight':
+        return '⬆️';
+      case 'roundabout':
+        return '🔄';
+      case 'merge':
+        return '↩️';
+      case 'fork':
+        return '⋔';
+      case 'arrive':
+        return '🏁';
+      case 'depart':
+        return '🚀';
+      default:
+        return '→';
+    }
+  };
   useEffect(() => {
     if (!mapRef.current || !destination) return;
 
@@ -104,7 +129,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const handleMarkerClick = (order: Order) => {
     setPopupInfo(order);
   };
-  
+
   return (
     <div className={`map-container ${isMapFullscreen ? 'w-full h-full' : 'w-full h-72'}`}>
       <Map
@@ -125,9 +150,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 <Navigation className="w-5 h-5 text-white" />
               </div>
               <div
-                className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
-                  isOnline ? 'bg-green-500' : 'bg-red-500'
-                }`}
+                className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${isOnline ? 'bg-green-500' : 'bg-red-500'
+                  }`}
               />
             </div>
           </Marker>
@@ -136,10 +160,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
         {destination && (
           <Marker longitude={destination.lng} latitude={destination.lat} anchor="bottom">
             <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-              <MapIcon className="w-5 h-5 text-white" />
+              <MapPinHouse className="w-5 h-5 text-white" />
             </div>
           </Marker>
         )}
+
+
+
 
         {isOnline &&
           nearbyOrders?.map((order) => (
@@ -191,23 +218,70 @@ const MapComponent: React.FC<MapComponentProps> = ({
       </Map>
 
       {isMapFullscreen && (
-        <button
-          className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md"
-          onClick={() => setIsMapFullscreen(false)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
+        <>
+          <button
+            className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md"
+            onClick={() => setIsMapFullscreen(false)}
           >
-            <path
-              fillRule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+
+          // Then replace the turn-by-turn panel with this enhanced version
+          {/* Turn-by-turn instructions panel */}
+          {routeInstructions && routeInstructions.length > 0 && (
+            <div className="absolute bottom-0 left-0 right-0 bg-white shadow-lg rounded-t-lg max-h-1/2 overflow-auto z-20">
+              <div
+                className="flex justify-between items-center p-3 border-b cursor-pointer"
+                onClick={() => setShowDirections(!showDirections)}
+              >
+                <div>
+                  <h3 className="font-bold">Turn-by-Turn Directions</h3>
+                  <p className="text-xs text-gray-500">
+                    {routeInstructions.length} steps •
+                    {' '}{Math.round(routeInstructions.reduce((acc, curr) => acc + curr.distance, 0) * 10) / 10} km •
+                    {' '}{Math.round(routeInstructions.reduce((acc, curr) => acc + curr.duration, 0))} min
+                  </p>
+                </div>
+                {showDirections ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+              </div>
+
+              {showDirections && (
+                <div className="p-2 max-h-64 overflow-y-auto">
+                  {routeInstructions.map((instruction, index) => (
+                    <div key={index} className="mb-3 border-b pb-2 last:border-0">
+                      <div className="flex items-start">
+                        <div
+                          className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-2 flex-shrink-0"
+                          title={instruction.maneuver}
+                        >
+                          {getManeuverIcon(instruction.type || instruction.maneuver, instruction.modifier)}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{instruction.text}</p>
+                          <div className="flex text-xs text-gray-500 mt-1">
+                            <span className="mr-3">{instruction.distance.toFixed(1)} km</span>
+                            {instruction.duration && <span>{Math.ceil(instruction.duration)} min</span>}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -60,6 +60,7 @@ export default function OrderDetails({
           {orderStatus === 'accepted' && (
             <AcceptedOrderView 
               selectedOrder={selectedOrder} 
+              
               confirmPickup={confirmPickup} 
               cancelOrder={cancelOrder} 
             />

@@ -195,12 +195,12 @@ import { Feature, LineString } from 'geojson';
 
 
 
-export type TurnInstruction = {
-  text: string;
-  distance: number;
-  maneuver: string;
-  duration?: number;
-};
+// export type TurnInstruction = {
+//   text: string;
+//   distance: number;
+//   maneuver: string;
+//   duration?: number;
+// };
 
 /**
  * Fetches directions between two points using Mapbox Directions API with turn-by-turn instructions
@@ -276,21 +276,21 @@ export const getDirectionsWithInstructions = async (
  * @param {string} mapboxToken - Mapbox access token 
  * @returns {Promise<Feature<LineString> | null>} - GeoJSON LineString feature representing the route
  */
-export const getDirections = async (
-  startLng: number, 
-  startLat: number, 
-  endLng: number, 
-  endLat: number, 
-  mapboxToken: string
-): Promise<Feature<LineString> | null> => {
-  try {
-    const { route } = await getDirectionsWithInstructions(startLng, startLat, endLng, endLat, mapboxToken);
-    return route;
-  } catch (error) {
-    console.error('Error fetching directions:', error);
-    return null;
-  }
-};
+// export const getDirections = async (
+//   startLng: number, 
+//   startLat: number, 
+//   endLng: number, 
+//   endLat: number, 
+//   mapboxToken: string
+// ): Promise<Feature<LineString> | null> => {
+//   try {
+//     const { route } = await getDirectionsWithInstructions(startLng, startLat, endLng, endLat, mapboxToken);
+//     return route;
+//   } catch (error) {
+//     console.error('Error fetching directions:', error);
+//     return null;
+//   }
+// };
 
 /**
  * Calculates estimated travel time between two points
@@ -364,6 +364,115 @@ export const getDistance = async (
     throw new Error('No routes found');
   } catch (error) {
     console.error('Error fetching distance:', error);
+    return null;
+  }
+};
+
+// utils/routeService.ts
+
+// Type definitions for turn-by-turn instructions
+export type TurnInstruction = {
+  text: string;
+  distance: number;
+  duration: number;
+  maneuver: string;
+  type?: string;
+  modifier?: string;
+};
+
+export type RouteResult = {
+  route: GeoJSON.Feature<GeoJSON.LineString>;
+  instructions: TurnInstruction[];
+  distance: number;
+  duration: number;
+};
+
+// Function to get directions from Mapbox API
+export const getDirections = async (
+  origin: { lat: number; lng: number },
+  destination: { lat: number; lng: number }
+): Promise<RouteResult | null> => {
+  try {
+    // Your Mapbox access token
+    const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiYXJ1bmFsdSIsImEiOiJjbTllZ3ZleHUxZWlxMmxzN3hyMmlxaXBjIn0.88xrwVeZkSlah-fUY3_3BA';
+    
+    // Build the Mapbox Directions API URL
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}`;
+    
+    // Query parameters
+    const params = new URLSearchParams({
+      access_token: MAPBOX_ACCESS_TOKEN,
+      geometries: 'geojson',
+      overview: 'full',
+      steps: 'true',
+      alternatives: 'false',
+      language: 'en'
+    });
+    
+    // Make the API request
+    const response = await fetch(`${url}?${params}`);
+    
+    if (!response.ok) {
+      throw new Error(`Directions API error: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    // Check if routes are available
+    if (!data.routes || data.routes.length === 0) {
+      console.warn('No routes found');
+      return null;
+    }
+    
+    // Get the first (optimal) route
+    const route = data.routes[0];
+    
+    // Extract and format instructions from steps
+    const instructions: TurnInstruction[] = route.legs.flatMap((leg: any) => 
+      leg.steps.map((step: any) => ({
+        text: step.maneuver.instruction,
+        distance: step.distance / 1000, // Convert to kilometers
+        duration: step.duration / 60, // Convert to minutes
+        maneuver: step.maneuver.type,
+        type: step.maneuver.type,
+        modifier: step.maneuver.modifier
+      }))
+    );
+    
+    // Convert route geometry to GeoJSON feature
+    const routeFeature: GeoJSON.Feature<GeoJSON.LineString> = {
+      type: 'Feature',
+      geometry: route.geometry,
+      properties: {}
+    };
+    
+    return {
+      route: routeFeature,
+      instructions,
+      distance: route.distance / 1000, // Convert to kilometers
+      duration: route.duration / 60 // Convert to minutes
+    };
+  } catch (error) {
+    console.error('Error fetching directions:', error);
+    return null;
+  }
+};
+
+// Function to estimate distance and duration between two points
+export const estimateRouteInfo = async (
+  origin: { lat: number; lng: number },
+  destination: { lat: number; lng: number }
+): Promise<{ distance: number; duration: number } | null> => {
+  try {
+    const routeResult = await getDirections(origin, destination);
+    if (!routeResult) return null;
+    
+    return {
+      distance: routeResult.distance,
+      duration: routeResult.duration
+    };
+  } catch (error) {
+    console.error('Error estimating route info:', error);
     return null;
   }
 };

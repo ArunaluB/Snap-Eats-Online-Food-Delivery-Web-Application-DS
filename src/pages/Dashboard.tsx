@@ -13,7 +13,7 @@ import StatusToggle from './StatusToggle';
 import OrderDetails from './OrderDetails';
 import CompletedToast from './CompletedToast';
 import MapComponent from './MapComponent';
-const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiYXJ1bmFsdSIsImEiOiJjbTllZ3ZleHUxZWlxMmxzN3hyMmlxaXBjIn0.88xrwVeZkSlah-fUY3_3BA';
+import { getDirections, TurnInstruction } from '../utils/routeService';
 const WEBSOCKET_BASE_URL = 'ws://localhost:8080/api/drivermanager';
 const DRIVER_LOCATION_WEBSOCKET = `${WEBSOCKET_BASE_URL}/ws/driver-location`;
 let locationSocket: WebSocket | null = new WebSocket(DRIVER_LOCATION_WEBSOCKET);
@@ -33,6 +33,8 @@ export default function Dashboard() {
   const [route, setRoute] = useState<Feature<LineString> | null>(null);
   const [destination, setDestination] = useState<Destination | null>(null);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  const [OrderId, setOrderId] = useState<string | null>(''); // support null if needed
+
   const [popupInfo, setPopupInfo] =
     useState<PopupInfo | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -41,7 +43,11 @@ export default function Dashboard() {
     longitude: 80.3671,
     zoom: 8
   });
-
+  // Add these state variables to your Dashboard component
+  const [routeInstructions, setRouteInstructions] = useState<TurnInstruction[]>([]);
+  const [isLoadingRoute, setIsLoadingRoute] = useState<boolean>(false);
+  const [routeDistance, setRouteDistance] = useState<number>(0);
+  const [routeDuration, setRouteDuration] = useState<number>(0);
   // Sample nearby orders
   const [nearbyOrders, setNearbyOrders] = useState<Order[]>([
     {
@@ -95,6 +101,33 @@ export default function Dashboard() {
       }
     }
   }, [isOnline, driverId, currentLocation, locationSocket]);
+
+
+  // Add this function to fetch directions
+  const fetchDirections = async (
+    origin: { lat: number; lng: number },
+    dest: { lat: number; lng: number }
+  ) => {
+    setIsLoadingRoute(true);
+    try {
+      const routeResult = await getDirections(origin, dest);
+
+      if (routeResult) {
+        setRoute(routeResult.route);
+        setRouteInstructions(routeResult.instructions);
+        setRouteDistance(routeResult.distance);
+        setRouteDuration(routeResult.duration);
+      } else {
+        console.error('No route found');
+        // Handle route not found error
+      }
+    } catch (error) {
+      console.error('Error fetching directions:', error);
+      // Handle error
+    } finally {
+      setIsLoadingRoute(false);
+    }
+  };
 
   // Get current location on component mount
   useEffect(() => {
@@ -445,10 +478,12 @@ export default function Dashboard() {
             const order = orderData.order || orderData;
             const distanceKm = orderData.distanceKm;
             const estimatedMinutes = orderData.estimatedMinutes;
-
+            console.log(order);
+            setOrderId(order.orderId); // this stores the correct string like "ORD12345678"
+            console.log('addddddddddd', OrderId);
             // Convert backend order to frontend format
             const newOrder: Order = {
-              id: order.id || order.orderid,
+              id: order.orderid,
               lat: order.shopLat,
               lng: order.shopLng,
               customerName: order.customerName || 'Customer',
@@ -465,6 +500,7 @@ export default function Dashboard() {
               estimatedMinutes: estimatedMinutes || undefined
             };
 
+            console.log('New order object:', newOrder);
             // Add to nearby orders
             setNearbyOrders(prevOrders => [...prevOrders, newOrder]);
             console.log('New order added to nearby orders:', newOrder);
@@ -634,9 +670,73 @@ export default function Dashboard() {
     setOrderStatus('pending');
   };
 
+  // // Handle accepting an order
+  // const acceptOrder = (order: Order) => {
+  //   if (stompClient && stompClient.active) {
+  //     setSelectedOrder(order);
+  //     setOrderStatus('accepted');
+  //     setShowOrderDetails(true);
+
+  //     // Create a destination for the shop
+  //     setDestination({
+  //       lat: order.shopLat,
+  //       lng: order.shopLng,
+  //       name: order.shop
+  //     });
+
+  //     stompClient.publish({
+  //       destination: `/app/driver/response`,
+  //       body: JSON.stringify({
+  //         orderId: order.id,
+  //         driverId: driverId,
+  //         accepted: true
+  //       })
+  //     });
 
 
-  // Handle accepting an order
+  //     // Remove the order from nearby orders
+  //     setNearbyOrders(prevOrders =>
+  //       prevOrders.filter(o => o.id !== order.id)
+  //     );
+
+  //   }
+  // };
+  // Update your acceptOrder function
+  // const acceptOrder = (order: Order) => {
+  //   if (stompClient && stompClient.active) {
+  //     setSelectedOrder(order);
+  //     setOrderStatus('accepted');
+  //     setShowOrderDetails(true);
+
+  //     // Create a destination for the shop
+  //     const shopDestination = {
+  //       lat: order.shopLat,
+  //       lng: order.shopLng,
+  //       name: order.shop
+  //     };
+  //     setDestination(shopDestination);
+
+  //     // Fetch directions to the shop
+  //     fetchDirections(
+  //       { lat: currentLocation.lat, lng: currentLocation.lng },
+  //       { lat: order.shopLat, lng: order.shopLng }
+  //     );
+
+  //     stompClient.publish({
+  //       destination: `/app/driver/response`,
+  //       body: JSON.stringify({
+  //         orderId: order.id,
+  //         driverId: driverId,
+  //         accepted: true
+  //       })
+  //     });
+
+  //     // Remove the order from nearby orders
+  //     setNearbyOrders(prevOrders =>
+  //       prevOrders.filter(o => o.id !== order.id)
+  //     );
+  //   }
+  // };
   const acceptOrder = (order: Order) => {
     if (stompClient && stompClient.active) {
       setSelectedOrder(order);
@@ -644,31 +744,95 @@ export default function Dashboard() {
       setShowOrderDetails(true);
 
       // Create a destination for the shop
-      setDestination({
+      const shopDestination = {
         lat: order.shopLat,
         lng: order.shopLng,
         name: order.shop
-      });
+      };
+      setDestination(shopDestination);
 
+      // Fetch directions to the shop
+      fetchDirections(
+        { lat: currentLocation.lat, lng: currentLocation.lng },
+        { lat: order.shopLat, lng: order.shopLng }
+      );
+
+      // UPDATED: Changed the destination path to match the new endpoint
       stompClient.publish({
-        destination: `/app/driver/response`,
+        destination: `/app/orders/driver-response`,
         body: JSON.stringify({
           orderId: order.id,
           driverId: driverId,
-          accepted: true
+          status: 'ACCEPTED'
         })
       });
-
 
       // Remove the order from nearby orders
       setNearbyOrders(prevOrders =>
         prevOrders.filter(o => o.id !== order.id)
       );
-
     }
   };
 
-  // Confirm pickup
+  // // Confirm pickup
+  // const confirmPickup = () => {
+  //   if (!selectedOrder) return;
+
+  //   // Update order status
+  //   setOrderStatus('pickup');
+
+  //   // Update the order in the list
+  //   const updatedOrders = nearbyOrders.map(order =>
+  //     order.id === selectedOrder.id
+  //       ? { ...order, status: 'pickup' }
+  //       : order
+  //   );
+  //   setNearbyOrders(updatedOrders);
+
+  //   // Set customer as destination and calculate directions
+  //   setDestination({
+  //     lat: selectedOrder.customerLat,
+  //     lng: selectedOrder.customerLng,
+  //     name: selectedOrder.destination
+  //   });
+
+  // };
+
+
+  // // Update your confirmPickup function
+  // const confirmPickup = () => {
+  //   if (!selectedOrder) return;
+
+  //   // Update order status
+  //   setOrderStatus('pickup');
+
+  //   // Update the order in the list
+  //   const updatedOrders = nearbyOrders.map(order =>
+  //     order.id === selectedOrder.id
+  //       ? { ...order, status: 'pickup' }
+  //       : order
+  //   );
+  //   setNearbyOrders(updatedOrders);
+
+  //   // Set customer as destination and calculate directions
+  //   const customerDestination = {
+  //     lat: selectedOrder.customerLat,
+  //     lng: selectedOrder.customerLng,
+  //     name: selectedOrder.destination
+  //   };
+  //   setDestination(customerDestination);
+
+
+
+  //   // Fetch directions to the customer
+  //   fetchDirections(
+  //     { lat: currentLocation.lat, lng: currentLocation.lng },
+  //     { lat: selectedOrder.customerLat, lng: selectedOrder.customerLng }
+  //   );
+
+
+  // };
+  // Update your confirmPickup function
   const confirmPickup = () => {
     if (!selectedOrder) return;
 
@@ -684,20 +848,71 @@ export default function Dashboard() {
     setNearbyOrders(updatedOrders);
 
     // Set customer as destination and calculate directions
-    setDestination({
+    const customerDestination = {
       lat: selectedOrder.customerLat,
       lng: selectedOrder.customerLng,
       name: selectedOrder.destination
-    });
+    };
+    setDestination(customerDestination);
 
+    // UPDATED: Send pickup confirmation to server
+    if (stompClient && stompClient.active) {
+      stompClient.publish({
+        destination: `/app/orders/driver-response`,
+        body: JSON.stringify({
+          orderId: selectedOrder.id,
+          driverId: driverId,
+          status: 'PICKED_UP'
+        })
+      });
+    }
+
+    // Fetch directions to the customer
+    fetchDirections(
+      { lat: currentLocation.lat, lng: currentLocation.lng },
+      { lat: selectedOrder.customerLat, lng: selectedOrder.customerLng }
+    );
   };
 
-  // Complete delivery
+  // // Complete delivery
+  // const completeDelivery = () => {
+  //   if (!selectedOrder) return;
+
+  //   // Update order status
+  //   setOrderStatus('completed');
+
+  //   // Update the order in the list
+  //   const updatedOrders = nearbyOrders.filter(order =>
+  //     order.id !== selectedOrder.id
+  //   );
+  //   setNearbyOrders(updatedOrders);
+
+  //   // Clear directions and destination
+  //   setRoute(null);
+  //   setDestination(null);
+  //   setIsMapFullscreen(false);
+
+  //   // Close order details
+  //   setShowOrderDetails(false);
+  // };
+  // Complete delivery function
   const completeDelivery = () => {
     if (!selectedOrder) return;
 
     // Update order status
     setOrderStatus('completed');
+
+    // UPDATED: Send completed status to server
+    if (stompClient && stompClient.active) {
+      stompClient.publish({
+        destination: `/app/orders/driver-response`,
+        body: JSON.stringify({
+          orderId: selectedOrder.id,
+          driverId: driverId,
+          status: 'DELIVERED'
+        })
+      });
+    }
 
     // Update the order in the list
     const updatedOrders = nearbyOrders.filter(order =>
@@ -714,16 +929,36 @@ export default function Dashboard() {
     setShowOrderDetails(false);
   };
 
+  // // Cancel order
+  // const cancelOrder = (order: Order) => {
+  //   if (stompClient && stompClient.active) {
+  //     // Send rejection message back to server
+  //     stompClient.publish({
+  //       destination: `/app/driver/response`,
+  //       body: JSON.stringify({
+  //         orderId: order.id,
+  //         driverId: driverId,
+  //         accepted: false
+  //       })
+  //     });
+
+  //     // Remove the order from nearby orders
+  //     setNearbyOrders(prevOrders =>
+  //       prevOrders.filter(o => o.id !== order.id)
+  //     );
+  //   }
+  // };
+
   // Cancel order
   const cancelOrder = (order: Order) => {
     if (stompClient && stompClient.active) {
-      // Send rejection message back to server
+      // UPDATED: Send rejection message back to server with new endpoint and status
       stompClient.publish({
-        destination: `/app/driver/response`,
+        destination: `/app/orders/driver-response`,
         body: JSON.stringify({
           orderId: order.id,
           driverId: driverId,
-          accepted: false
+          status: 'REJECTED'
         })
       });
 
@@ -750,6 +985,8 @@ export default function Dashboard() {
           setViewState={setViewState}
           currentLocation={currentLocation}
           destination={destination}
+          customerLat={selectedOrder?.customerLat}
+          customerLng={selectedOrder?.customerLng}
           route={route ? { type: 'FeatureCollection', features: [route] } : null}
           isOnline={isOnline}
           nearbyOrders={nearbyOrders}
@@ -759,7 +996,10 @@ export default function Dashboard() {
           popupInfo={popupInfo}
           setPopupInfo={setPopupInfo}
           isMapFullscreen={isMapFullscreen}
+          setIsMapFullscreen={setIsMapFullscreen}
+          routeInstructions={routeInstructions}
         />
+
 
         {/* Status toggle - visible in both normal and fullscreen mode */}
         <StatusToggle
@@ -835,6 +1075,18 @@ export default function Dashboard() {
       {orderStatus === 'completed' && (
         <CompletedToast setOrderStatus={setOrderStatus} />
       )}
+
+      {isLoadingRoute && (
+        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-lg shadow-lg">
+            <p className="text-center">Calculating best route...</p>
+            <div className="mt-2 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-full bg-blue-500 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
