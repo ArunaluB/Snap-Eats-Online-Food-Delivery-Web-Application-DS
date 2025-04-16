@@ -14,6 +14,7 @@
     "@clerk/nextjs": "^6.14.3",
     "@react-google-maps/api": "^2.20.6",
     "@stomp/stompjs": "^7.1.1",
+    "framer-motion": "^12.7.3",
     "geojson": "^0.5.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.441.0",
@@ -24,7 +25,8 @@
     "react-leaflet": "^4.2.1",
     "react-map-gl": "^7.1.9",
     "react-router-dom": "^6.26.2",
-    "sockjs-client": "^1.6.1"
+    "sockjs-client": "^1.6.1",
+    "three": "^0.175.0"
   },
   "devDependencies": {
     "@types/mapbox-gl": "^3.4.1",
@@ -32,7 +34,9 @@
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@types/react-map-gl": "^6.1.7",
+    "@types/serviceworker": "^0.0.129",
     "@types/sockjs-client": "^1.5.4",
+    "@types/three": "^0.175.0",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
     "@vitejs/plugin-react": "^4.2.1",
