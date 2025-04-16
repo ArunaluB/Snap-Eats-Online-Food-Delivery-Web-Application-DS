@@ -4,13 +4,13 @@ import { X, Check, User, Phone, Navigation } from 'lucide-react';
 interface OrderDetailsProps {
   selectedOrder: {
     shop: string;
-    distance: string;
+    distance: number;
     destination: string;
     customerName: string;
     customerPhone: string;
     amount: string;
   };
-  orderStatus: 'pending' | 'accepted' | 'pickup' | 'completed';
+  orderStatus: 'pending' | 'accepted' | 'pickup' | 'completed' | 'cancelled';
   setShowOrderDetails: (show: boolean) => void;
   acceptOrder: (order: any) => void;
   confirmPickup: () => void;
@@ -60,6 +60,7 @@ export default function OrderDetails({
           {orderStatus === 'accepted' && (
             <AcceptedOrderView 
               selectedOrder={selectedOrder} 
+              
               confirmPickup={confirmPickup} 
               cancelOrder={cancelOrder} 
             />
