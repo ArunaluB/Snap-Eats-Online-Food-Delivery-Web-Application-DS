@@ -56,7 +56,7 @@ export default function Header() {
   return (
     <div className="bg-white p-4 flex justify-between items-center shadow">
       <div className="flex items-center space-x-2">
-        <div className="bg-gray-300 w-10 h-10 rounded-full"></div>
+        <div className="bg-gray-100 w-10 h-10 rounded-full"></div>
         <div>
           <h2 className="font-medium">Driver</h2>
           <p className="text-xs text-gray-500">ID: #DR12345</p>

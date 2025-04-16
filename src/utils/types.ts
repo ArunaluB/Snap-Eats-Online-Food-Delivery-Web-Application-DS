@@ -1,6 +1,6 @@
 
 export interface Order {
-  id: number;
+  id: string;
   lat: number;
   lng: number;
   customerName: string;
