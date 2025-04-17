@@ -235,6 +235,7 @@ export default function Dashboard() {
             };
 
             setNearbyOrders((prev) => [...prev, newOrder]);
+            notificationService.init(NOTIFICATION_AUDIO_SRC);
             notificationService.show(
               'New Order Request',
               `New order from ${newOrder.shop} (${newOrder.distance}, ETA: ${newOrder.estimatedMinutes || 'N/A'} min)`,
@@ -382,6 +383,7 @@ export default function Dashboard() {
     setDestination(null);
     setIsMapFullscreen(false);
     setShowOrderDetails(false);
+    setSelectedOrder(null);
   };
 
   const cancelOrder = (order: Order) => {
