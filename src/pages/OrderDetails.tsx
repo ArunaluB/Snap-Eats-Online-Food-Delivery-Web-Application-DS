@@ -1,4 +1,3 @@
-// components/OrderDetails.jsx
 import { X, Check, User, Phone, Navigation } from 'lucide-react';
 
 interface OrderDetailsProps {

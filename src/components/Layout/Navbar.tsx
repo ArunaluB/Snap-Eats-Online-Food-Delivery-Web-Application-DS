@@ -1,15 +1,8 @@
 import { BellIcon } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  SignInButton,
-  SignUpButton,
-  UserButton,
-  useUser,
-} from '@clerk/clerk-react';
 
 export function Navbar() {
   const location = useLocation();
-  const { isSignedIn } = useUser();
 
   const isActive = (path: string) =>
     location.pathname === path ? 'text-yellow-600 font-semibold' : 'text-gray-600';
@@ -43,22 +36,16 @@ export function Navbar() {
               </span>
             </button>
 
-            {!isSignedIn ? (
-              <>
-                <SignInButton>
-                  <button className="px-4 py-2 rounded text-gray-700 hover:text-yellow-500 font-medium flex items-center">
-                    Login
-                  </button>
-                </SignInButton>
-                <SignUpButton>
-                  <button className="px-4 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition">
-                    Sign Up
-                  </button>
-                </SignUpButton>
-              </>
-            ) : (
-              <UserButton />
-            )}
+            <Link to="/login">
+              <button className="px-4 py-2 rounded text-gray-700 hover:text-yellow-500 font-medium flex items-center">
+                Login
+              </button>
+            </Link>
+            <Link to="/signup">
+              <button className="px-4 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition">
+                Sign Up
+              </button>
+            </Link>
           </div>
         </div>
       </div>
