@@ -227,13 +227,13 @@ export default function Dashboard() {
               destination: order.deliveryAddress || 'Destination',
               customerLat: order.customerLat,
               customerLng: order.customerLng,
-              distance: distance ? parseFloat((distance / 1000).toFixed(1)) : 0,
+              distance: distance ?? 0,
               amount: `LKR ${order.amount || 0}`,
               status: order.status || 'pending',
               estimatedMinutes: estimatedTime ? Math.round(estimatedTime) : 0,
               distanceToShop: distanceToShop ? parseFloat((distanceToShop / 1000).toFixed(1)) : 0,
             };
-
+            console.log('New order received:', distance, distanceToShop, estimatedTime);
             setNearbyOrders((prev) => [...prev, newOrder]);
             notificationService.init(NOTIFICATION_AUDIO_SRC);
             notificationService.show(
@@ -248,7 +248,6 @@ export default function Dashboard() {
                 },
               }
             );
-            notificationService.init(NOTIFICATION_AUDIO_SRC);
           } catch (error) {
             console.error('Error processing order message:', error);
           }
@@ -346,6 +345,12 @@ export default function Dashboard() {
         destination: `/app/driver/response`,
         body: JSON.stringify({ orderId: order.id, driverId, accepted: true }),
       });
+      if (!selectedOrder || !stompClient || !stompClient.active) return;
+      stompClient.publish({
+        destination: `/app/orders/orders-details`,
+        body: JSON.stringify({ id: selectedOrder.id, distance:order.distance, distanceToShop: order.distanceToShop ,estimatedTimeToShop: order.estimatedMinutes }),
+      });
+
       setNearbyOrders((prev) => prev.filter((o) => o.id !== order.id));
     }
   };
