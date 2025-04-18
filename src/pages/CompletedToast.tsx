@@ -1,4 +1,3 @@
-// components/CompletedToast.jsx
 import { Check, X } from 'lucide-react';
 
 interface CompletedToastProps {
