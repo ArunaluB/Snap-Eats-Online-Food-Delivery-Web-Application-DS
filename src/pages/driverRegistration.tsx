@@ -1,7 +1,10 @@
 import { Mail, Lock, User, Phone, Car, IdCard, MapPin } from "lucide-react";
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
+import BackgroundAnimation from "./BackgroundAnimation";
 
 export function DriverRegister() {
+  const [step, setStep] = useState(1);
+
   const [formData, setFormData] = useState({
     id: "",
     driverId: "",
@@ -13,21 +16,21 @@ export function DriverRegister() {
     vehicleType: "",
     vehicleNo: "",
     vehicleModel: "",
+    vehicleColor: "",
     nicNo: "",
     licencePlate: "",
     licenceNumber: "",
     licenceExpiryDate: "",
     password: "",
-    profileImage: null,
+    profileImage: null as File | null,
     addressTestimony: "",
-    licenseImagePathFront: null,
-    licenseImagePathBack: null,
-    nicImagePathFront: null,
-    nicImagePathBack: null,
-    vehicleFrontPath: null,
-    vehicleRearPath: null,
-    vehicleSidePath: null,
-    vehicleColor: "",
+    licenseImagePathFront: null as File | null,
+    licenseImagePathBack: null as File | null,
+    nicImagePathFront: null as File | null,
+    nicImagePathBack: null as File | null,
+    vehicleFrontPath: null as File | null,
+    vehicleRearPath: null as File | null,
+    vehicleSidePath: null as File | null,
   });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -39,6 +42,15 @@ export function DriverRegister() {
     if (files && files[0]) {
       setFormData({ ...formData, [name]: files[0] });
     }
+  };
+
+  const nextStep = () => setStep((prev) => Math.min(prev + 1, 3));
+  const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    console.log("Form submitted:", formData);
+    // Handle final submission logic here
   };
 
   const textFields = [
@@ -82,65 +94,157 @@ export function DriverRegister() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center py-10">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1695654390723-479197a8c4a3?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGZvb2QlMjBkZWxpdmVyeXxlbnwwfHwwfHx8MA%3D%3D')",
-          filter: "brightness(0.3)",
-        }}
-      />
-      <div className="relative z-10 bg-white/70 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-full max-w-4xl">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Driver Registration</h2>
-        <form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {textFields.map(({ name, label, icon, isSelect, type = "text" }) => (
-            <div className="relative" key={name}>
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">{icon}</div>
-              {isSelect ? (
-                <select
-                  name={name}
-                  value={formData[name as keyof typeof formData] as string}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
-                >
-                  <option value="">Select Vehicle Type</option>
-                  <option value="Car">Car</option>
-                  <option value="Bike">Bike</option>
-                  <option value="Van">Van</option>
-                  <option value="Bus">Bus</option>
-                  <option value="Truck">Truck</option>
-                </select>
-              ) : (
+    <div className="relative min-h-screen flex mt-4 items-center justify-center py-10">
+      <BackgroundAnimation />
+      <div className="w-full max-w-xl bg-gradient-to-r from-yellow-100 to-blue-100 p-4 md:p-6 justify-between items-center shadow-2xl rounded-lg">
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">
+          Driver Registration
+        </h2>
+
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Step 1 - Personal Info */}
+          {step === 1 &&
+            textFields
+              .filter(({ name }) =>
+                ["username", "firstName", "lastName", "email", "phoneNumber", "password"].includes(
+                  name
+                )
+              )
+              .map(({ name, label, icon, type = "text" }) => (
+                <div className="relative" key={name}>
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    {icon}
+                  </div>
+                  <input
+                    name={name}
+                    type={type}
+                    placeholder={label}
+                    value={formData[name as keyof typeof formData] as string}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                  />
+                </div>
+              ))}
+
+          {/* Step 2 - Vehicle Info */}
+          {step === 2 &&
+            textFields
+              .filter(({ name }) =>
+                [
+                  "vehicleType",
+                  "vehicleNo",
+                  "vehicleModel",
+                  "vehicleColor",
+                  "licencePlate",
+                  "licenceNumber",
+                  "licenceExpiryDate",
+                ].includes(name)
+              )
+              .map(({ name, label, icon, isSelect, type = "text" }) => (
+                <div className="relative" key={name}>
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    {icon}
+                  </div>
+                  {isSelect ? (
+                    <select
+                      name={name}
+                      value={formData[name as keyof typeof formData] as string}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                    >
+                      <option value="">Select Vehicle Type</option>
+                      <option value="Car">Car</option>
+                      <option value="Bike">Bike</option>
+                      <option value="Van">Van</option>
+                      <option value="Bus">Bus</option>
+                      <option value="Truck">Truck</option>
+                    </select>
+                  ) : (
+                    <input
+                      name={name}
+                      type={type}
+                      placeholder={label}
+                      value={formData[name as keyof typeof formData] as string}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                    />
+                  )}
+                </div>
+              ))}
+
+          {/* Step 3 - Documents */}
+          {step === 3 && (
+            <>
+              <div className="relative col-span-full">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <IdCard />
+                </div>
                 <input
-                  name={name}
-                  type={type}
-                  placeholder={label}
-                  value={formData[name as keyof typeof formData] as string}
+                  name="nicNo"
+                  placeholder="NIC No"
+                  value={formData.nicNo}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
                 />
-              )}
-            </div>
-          ))}
+              </div>
 
-          {fileFields.map((field) => (
-            <div key={field} className="col-span-full">
-              <label className="block mb-1 text-sm font-medium text-gray-600 capitalize">
-                {fileLabels[field]}
-              </label>
-              <input
-                name={field}
-                type="file"
-                onChange={handleFileChange}
-                className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-pink-400"
-              />
-            </div>
-          ))}
+              <div className="relative col-span-full">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <MapPin />
+                </div>
+                <input
+                  name="addressTestimony"
+                  placeholder="Address Testimony"
+                  value={formData.addressTestimony}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                />
+              </div>
 
-          <button className="col-span-full bg-yellow-500 font-bold text-white py-3 rounded-xl hover:bg-gray-900 transition">
-            Register
-          </button>
+              {fileFields.map((field) => (
+                <div key={field} className="col-span-full">
+                  <label className="block mb-1 text-sm font-medium text-gray-600 capitalize">
+                    {fileLabels[field]}
+                  </label>
+                  <input
+                    name={field}
+                    type="file"
+                    onChange={handleFileChange}
+                    className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-pink-400"
+                  />
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* Step Buttons */}
+          <div className="col-span-full flex justify-between mt-4">
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={prevStep}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded-xl"
+              >
+                Previous
+              </button>
+            )}
+            {step < 3 ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-xl ml-auto"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="bg-yellow-500 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded-xl ml-auto"
+              >
+                Register
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>
