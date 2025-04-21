@@ -24,14 +24,10 @@ export function CustomerRegister() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center py-10">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
-        style={{
-          backgroundImage:
-            "url('https://wallpapers.com/images/hd/classy-butter-chicken-platter-indian-food-s8a8b9aojk6kqoz0.jpg')",
-          filter: "blur(1px) brightness(0.7)",
-        }}
-      />
+      {/* Background Image with Blur and Dark Brightness */}
+      <div className="absolute inset-0 bg-[url('https://wallpapers.com/images/hd/classy-butter-chicken-platter-indian-food-s8a8b9aojk6kqoz0.jpg')] bg-cover bg-center bg-no-repeat z-0 filter blur-sm brightness-25" />
+
+      {/* Registration Form Container */}
       <div className="relative z-10 bg-white/70 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-full max-w-md">
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">
           Customer Registration

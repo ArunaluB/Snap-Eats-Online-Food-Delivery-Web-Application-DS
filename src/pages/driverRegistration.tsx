@@ -88,7 +88,7 @@ export function DriverRegister() {
         style={{
           backgroundImage:
             "url('https://images.unsplash.com/photo-1695654390723-479197a8c4a3?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGZvb2QlMjBkZWxpdmVyeXxlbnwwfHwwfHx8MA%3D%3D')",
-          filter: "brightness(0.8)",
+          filter: "brightness(0.3)",
         }}
       />
       <div className="relative z-10 bg-white/70 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-full max-w-4xl">

@@ -14,7 +14,7 @@ export function Login() {
         style={{
           backgroundImage:
             "url('https://static.vecteezy.com/system/resources/previews/051/740/895/non_2x/traditional-indian-cuisine-displayed-on-rustic-tabletop-photo.jpg')",
-          filter: "blur(1px) brightness(0.7)",
+          filter: "blur(1px) brightness(0.3)",
         }}
       />
       <div className="relative z-10 bg-white/70 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-full max-w-md space-y-6 animate-fade-in">
