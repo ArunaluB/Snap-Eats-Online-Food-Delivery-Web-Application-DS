@@ -1,6 +1,5 @@
 import { Mail, Lock, User, Phone } from "lucide-react";
 import { useState, ChangeEvent } from "react";
-import BackgroundAnimation from './BackgroundAnimation';  // Import your animation component
 
 export function CustomerRegister() {
   const [formData, setFormData] = useState({
@@ -25,7 +24,14 @@ export function CustomerRegister() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center py-10">
-      <BackgroundAnimation /> 
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
+        style={{
+          backgroundImage:
+            "url('https://wallpapers.com/images/hd/classy-butter-chicken-platter-indian-food-s8a8b9aojk6kqoz0.jpg')",
+          filter: "blur(1px) brightness(0.7)",
+        }}
+      />
       <div className="relative z-10 bg-white/70 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-full max-w-md">
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">
           Customer Registration
@@ -52,4 +58,5 @@ export function CustomerRegister() {
       </div>
     </div>
   );
+
 }
