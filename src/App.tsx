@@ -19,16 +19,9 @@ export function App() {
   return <Router>
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-4">
+      <main>
         <Routes>
-          <Route path="/driver" element={<EnhancedLayout>
-            <Dashboard />
-          </EnhancedLayout>} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/earnings" element={<Earnings />} />
-
-          <Route path="/" element={
+        <Route path="/" element={
           <>
             <Dashbord />
             <Features />
@@ -41,6 +34,12 @@ export function App() {
         <Route path="/customer-register" element={<CustomerRegister />} />
         <Route path="/driver-register" element={<DriverRegister />} />
         <Route path="/restaurant-register" element={<RestaurantRegister />} />
+          <Route path="/driver" element={<EnhancedLayout>
+            <Dashboard />
+          </EnhancedLayout>} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/earnings" element={<Earnings />} />
         </Routes>
       </main>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { PackageIcon, TruckIcon, MapPinIcon, CheckCircleIcon, ArrowRightIcon } from 'lucide-react';
 
 interface RecentOrdersProps {
