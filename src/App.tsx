@@ -8,9 +8,9 @@ import EnhancedLayout from './pages/EnhancedLayout';
 
 export function App() {
   return <Router>
-    <div className="flex flex-col min-h-screen bg-gray-100">
+    <div className=" flex-col min-h-screen bg-gray-100">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-4">
+      <main>
         <Routes>
           <Route path="/" element={<EnhancedLayout>
             <Dashboard />
