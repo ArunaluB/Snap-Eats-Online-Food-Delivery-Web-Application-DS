@@ -1,5 +1,5 @@
 // Define a base type for the item
-interface MenuItem {
+export interface MenuItem {
     id: string;
     title: string;
     rating: number;
@@ -7,29 +7,30 @@ interface MenuItem {
     description: string;
     price: number;
     imageSrc: string;
+    category: string; 
 }
 
 // Extend MenuItem for FeaturedItem to include additional property
-interface FeaturedItem extends MenuItem {
+export interface FeaturedItem extends MenuItem {
     saleType: string;  // Unique property for FeaturedItem
 }
 
 // MenuItemProps interface using the MenuItem base type
-interface MenuItemProps {
+export interface MenuItemProps {
     item: MenuItem;  // Use the base type
     onClickedMenuItem: (item: MenuItem) => void; // Function to handle adding an item to the cart
 }
 
-type RestaurantDetails = {
+export type RestaurantDetails = {
     name: string;
     imageSrc: string;
     logoSrc: string;
     rating: number;
     deliveryDetails: string;
     openHours: string;
-  };
+};
 
-  interface RestaurantResponseDTO {
+export interface RestaurantResponseDTO {
     id: string;
     name: string;
     address: AddressDTO;
@@ -50,7 +51,7 @@ type RestaurantDetails = {
     isActive: boolean;
 }
 
-interface AddressDTO {
+export interface AddressDTO {
     street: string;
     city: string;
     state: string;
@@ -60,7 +61,7 @@ interface AddressDTO {
     longitude: number;
 }
 
-interface RestaurantResponseDTO {
+export interface RestaurantResponseDTO {
     id: string;
     name: string;
     address: AddressDTO;
@@ -81,7 +82,7 @@ interface RestaurantResponseDTO {
     isActive: boolean;
 }
 
-type CuisineType = 
+export type CuisineType =
     | 'ITALIAN'
     | 'CHINESE'
     | 'INDIAN'
@@ -100,3 +101,24 @@ type CuisineType =
     | 'VEGETARIAN'
     | 'VEGAN'
     | 'OTHER';
+
+export interface MenuCategoriesProps {
+    restaurantId: string;
+    restaurantName: string;
+    MenuItemCount: number;
+}
+
+// Mapping backend enum values to frontend-friendly display names
+export const categoryDisplayNames: Record<string, string> = {
+    APPETIZER: "Appetizer",
+    MAIN_COURSE: "Main Dish",
+    DESSERT: "Dessert",
+    BEVERAGE: "Beverage",
+    SIDE: "Side",
+    COMBO: "Combo Pack",
+    SPECIAL: "Specials",
+    BREAKFAST: "Breakfast",
+    SALAD: "Salads",
+    KIDS: "Kids Menu",
+    SNACK: "Snacks",
+};

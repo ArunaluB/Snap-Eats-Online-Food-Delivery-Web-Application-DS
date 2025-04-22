@@ -1,3 +1,5 @@
+import { FeaturedItem } from "../fod-order-types";
+
 interface FeaturedItemsSectionProps {
     featuredItems: FeaturedItem[];
     onClickedMenuItem: (item: FeaturedItem) => void; // Function to handle adding an item to the cart

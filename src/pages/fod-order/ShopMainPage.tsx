@@ -9,75 +9,88 @@ import { Footer } from "../../components/fod-order/Footer";
 
 // Define the shape of restaurant data from API
 interface RestaurantResponseDTO {
-  name: string;
-  imageUrls: string[];
-  logoUrl: string;
-  averageRating: number;
-  estimatedDeliveryTime: number;
-  deliveryFee: number;
-  operatingHours: string[];
+    id: string;
+    name: string;
+    imageUrls: string[];
+    logoUrl: string;
+    averageRating: number;
+    estimatedDeliveryTime: number;
+    deliveryFee: number;
+    operatingHours: string[];
 }
 
 // Shape expected by HeroSection & InfoSection
 interface RestaurantDetails {
-  name: string;
-  imageSrc: string;
-  logoSrc: string;
-  rating: number;
-  deliveryDetails: string;
-  openHours: string;
+    id: string;
+    name: string;
+    imageSrc: string;
+    logoSrc: string;
+    rating: number;
+    deliveryDetails: string;
+    openHours: string;
 }
 
 export const ShopMainPage: React.FC = () => {
-  const [restaurantDetails, setRestaurantDetails] = useState<RestaurantDetails | null>(null);
+    const [restaurantDetails, setRestaurantDetails] = useState<RestaurantDetails | null>(null);
+    const [menuCategoriesProps, setMenuCategoriesProps] = useState<MenuCategoriesProps>({
+        restaurantId: "",
+        restaurantName: "",
+        MenuItemCount: 0,
+    });
+    useEffect(() => {
+        const fetchRestaurantDetails = async () => {
+            try {
+                const response = await axios.get<RestaurantResponseDTO>("http://localhost:8222/order-service/api/shops/67fde55233027910028186e3");
 
-  useEffect(() => {
-    const fetchRestaurantDetails = async () => {
-      try {
-        const response = await axios.get<RestaurantResponseDTO>("http://localhost:8222/order-service/api/shops/67fde55233027910028186e3");
+                const restaurant = response.data;
 
-        const restaurant = response.data;
+                const details: RestaurantDetails = {
+                    id: restaurant.id,
+                    name: restaurant.name,
+                    imageSrc: restaurant.imageUrls[0] || "", // Safe fallback
+                    logoSrc: restaurant.logoUrl,
+                    rating: restaurant.averageRating,
+                    deliveryDetails: `${restaurant.estimatedDeliveryTime} min • $$ • Delivery Fee: $${restaurant.deliveryFee.toFixed(2)}`,
+                    openHours: restaurant.operatingHours.join(", "),
+                };
 
-        const details: RestaurantDetails = {
-          name: restaurant.name,
-          imageSrc: restaurant.imageUrls[0] || "", // Safe fallback
-          logoSrc: restaurant.logoUrl,
-          rating: restaurant.averageRating,
-          deliveryDetails: `${restaurant.estimatedDeliveryTime} min • $$ • Delivery Fee: $${restaurant.deliveryFee.toFixed(2)}`,
-          openHours: restaurant.operatingHours.join(", "),
+                setMenuCategoriesProps({
+                    restaurantId: restaurant.id,
+                    restaurantName: restaurant.name,
+                    MenuItemCount: 10, // Temp item count
+                });
+
+                setRestaurantDetails(details);
+            } catch (error) {
+                console.error("Failed to fetch restaurant details:", error);
+            }
         };
 
-        setRestaurantDetails(details);
-      } catch (error) {
-        console.error("Failed to fetch restaurant details:", error);
-      }
-    };
+        fetchRestaurantDetails();
+    }, []);
 
-    fetchRestaurantDetails();
-  }, []);
+    if (!restaurantDetails) {
+        return <div>Loading...</div>;
+    }
 
-  if (!restaurantDetails) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <div id="webcrumbs">
-      <div className="bg-white w-full max-w-7xl mx-auto rounded-lg overflow-hidden">
-        <HeroSection {...restaurantDetails} />
-        <InfoSection {...restaurantDetails} />
-        <div className="flex flex-col md:flex-row">
-          <MenuCategories />
-          <div className="flex-1 p-4 align-left">
-            <OfferSection
-              title="Savings and more"
-              message="Try Uber One free for 1 month"
-              imageSrc=""
-            />
-            <MenuSection />
-          </div>
+    return (
+        <div id="webcrumbs">
+            <div className="bg-white w-full max-w-7xl mx-auto rounded-lg overflow-hidden">
+                <HeroSection {...restaurantDetails} />
+                <InfoSection {...restaurantDetails} />
+                <div className="flex flex-col md:flex-row">
+                    <MenuCategories {...menuCategoriesProps}/>
+                    <div className="flex-1 p-4 align-left">
+                        <OfferSection
+                            title="Savings and more"
+                            message="Try Uber One free for 1 month"
+                            imageSrc=""
+                        />
+                        <MenuSection />
+                    </div>
+                </div>
+            </div>
+            <Footer />
         </div>
-      </div>
-      <Footer />
-    </div>
-  );
+    );
 };
