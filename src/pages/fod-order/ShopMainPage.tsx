@@ -6,6 +6,7 @@ import { MenuCategories } from "../../components/fod-order/shop/MenuCategories";
 import { MenuSection } from "../../components/fod-order/shop/MenuSection";
 import { OfferSection } from "../../components/fod-order/shop/OfferSection";
 import { Footer } from "../../components/fod-order/Footer";
+import { MenuCategoriesProps } from "../../components/fod-order/fod-order-types";
 
 // Define the shape of restaurant data from API
 interface RestaurantResponseDTO {

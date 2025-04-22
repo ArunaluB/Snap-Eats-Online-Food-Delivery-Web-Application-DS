@@ -122,3 +122,48 @@ export const categoryDisplayNames: Record<string, string> = {
     KIDS: "Kids Menu",
     SNACK: "Snacks",
 };
+
+export interface CartMenuItem {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    category: string;
+    imageUrls: string[];
+    dietaryTags: string[];
+    calories: number;
+    customizationOptions: string[];
+    discountPrice: number;
+    preparationTime: number;
+    reviews: Array<{
+        id: string;
+        userId: string;
+        userName: string;
+        comment: string;
+        rating: number;
+        createdAt: string;
+    }>;
+    available: boolean;
+    active: boolean;
+}
+
+export interface CartItem {
+    menuItem: CartMenuItem;
+    quantity: number;
+    customizations: string[];
+    totalPrice: number;
+    totalDiscount: number;
+    netTotalPrice: number;
+}
+
+export interface CartData {
+    id: string;
+    userId: string;
+    restaurant: {
+        name: string;
+        address: AddressDTO;
+        imageUrls: string[];
+    };
+    items: CartItem[];
+    subtotal: number;
+}
