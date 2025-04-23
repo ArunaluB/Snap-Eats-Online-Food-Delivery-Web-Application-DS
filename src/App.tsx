@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Dashboard from './pages/Dashboard';
 import { Orders } from './pages/Orders';
 import { Profile } from './pages/Profile';
-import { Earnings } from './pages/Earnings';
+import Earnings from './pages/Earnings';
 import { Navbar } from './components/Layout/Navbar';
 import EnhancedLayout from './pages/EnhancedLayout';
 import { ShopMainPage } from './pages/fod-order/ShopMainPage';
