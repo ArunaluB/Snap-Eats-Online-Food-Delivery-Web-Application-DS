@@ -6,7 +6,7 @@ interface CustomAddOnProps {
         title: string;
         price: number;
         description: string;
-        imageSrc: string;
+        imageUrls: string;
     };
     onClose: () => void;
 }
@@ -132,7 +132,7 @@ export const CustomAddOn: React.FC<CustomAddOnProps> = ({ selectedItem, onClose 
                             {/* Left: Image */}
                             <div className="w-1/2 p-6 flex items-start justify-center border-r overflow-y-auto">
                                 <img
-                                    src={selectedItem.imageSrc}
+                                    src={selectedItem.imageUrls}
                                     alt={selectedItem.title}
                                     className="w-full max-w-xs h-auto rounded-lg hover:scale-105 transition-transform duration-300"
                                 />

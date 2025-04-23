@@ -43,7 +43,7 @@
 // };
 
 import React, { useEffect, useState } from "react";
-import { categoryDisplayNames, MenuCategoriesProps } from '../fod-order-types';
+import { categoryDisplayNames, MenuCategoriesProps } from '../../../utils/fod-order-types';
 
 export const MenuCategories: React.FC<MenuCategoriesProps> = ({ restaurantId, restaurantName, MenuItemCount }) => {
     const [categories, setCategories] = useState<string[]>([]);

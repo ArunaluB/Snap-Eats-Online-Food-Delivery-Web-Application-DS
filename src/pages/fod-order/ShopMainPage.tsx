@@ -6,7 +6,7 @@ import { MenuCategories } from "../../components/fod-order/shop/MenuCategories";
 import { MenuSection } from "../../components/fod-order/shop/MenuSection";
 import { OfferSection } from "../../components/fod-order/shop/OfferSection";
 import { Footer } from "../../components/fod-order/Footer";
-import { MenuCategoriesProps } from "../../components/fod-order/fod-order-types";
+import { MenuCategoriesProps } from "../../utils/fod-order-types";
 
 // Define the shape of restaurant data from API
 interface RestaurantResponseDTO {
@@ -24,7 +24,7 @@ interface RestaurantResponseDTO {
 interface RestaurantDetails {
     id: string;
     name: string;
-    imageSrc: string;
+    imageUrls: string;
     logoSrc: string;
     rating: number;
     deliveryDetails: string;
@@ -48,7 +48,7 @@ export const ShopMainPage: React.FC = () => {
                 const details: RestaurantDetails = {
                     id: restaurant.id,
                     name: restaurant.name,
-                    imageSrc: restaurant.imageUrls[0] || "", // Safe fallback
+                    imageUrls: restaurant.imageUrls[0] || "", // Safe fallback
                     logoSrc: restaurant.logoUrl,
                     rating: restaurant.averageRating,
                     deliveryDetails: `${restaurant.estimatedDeliveryTime} min • $$ • Delivery Fee: $${restaurant.deliveryFee.toFixed(2)}`,
@@ -84,8 +84,8 @@ export const ShopMainPage: React.FC = () => {
                     <div className="flex-1 p-4 align-left">
                         <OfferSection
                             title="Savings and more"
-                            message="Try Uber One free for 1 month"
-                            imageSrc=""
+                            message="Try Snap One free for 1 month"
+                            imageUrls=""
                         />
                         <MenuSection />
                     </div>

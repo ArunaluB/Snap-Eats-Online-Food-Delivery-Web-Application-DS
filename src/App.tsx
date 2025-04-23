@@ -7,6 +7,7 @@ import { Navbar } from './components/Layout/Navbar';
 import EnhancedLayout from './pages/EnhancedLayout';
 import { ShopMainPage } from './pages/fod-order/ShopMainPage';
 import { UserNavBar } from './components/fod-order/UserNavBar';
+import { OrderSummaryPage } from './pages/fod-order/OrderSummaryPage';
 
 export function App() {
   return (
@@ -34,12 +35,13 @@ function LayoutWrapper() {
           } />
 
           //fod-delevary
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/earnings" element={<Earnings />} />
+          <Route path="/orders" element={<Orders/>} />
+          <Route path="/profile" element={<Profile/>} />
+          <Route path="/earnings" element={<Earnings/>} />
 
           // fod-order
-          <Route path="/fod-order/Shop" element={<ShopMainPage />} />
+          <Route path="/fod-order/Shop" element={<ShopMainPage/>} />
+          <Route path="/fod-order/order-summary/:userId" element={<OrderSummaryPage/>} />
 
         </Routes>
       </main>

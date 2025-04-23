@@ -4,9 +4,12 @@ export const Footer = () => {
     return (
         <footer id="webcrumbs" className="bg-white text-gray-800">
             <div className=" flex flex-col justify-between px-4 py-8 lg:min-w-[1024px]">
+            <br/>
+            <hr/>
                 <div className="max-w-7xl mx-auto w-full">
                     <div className="flex flex-col md:flex-row justify-between items-start gap-10">
                         <div className="flex flex-col gap-8">
+                        
                             <h1 className="text-xl font-bold">Snap Eats</h1>
 
                             <div className="mt-6 flex flex-col gap-4">
@@ -72,7 +75,7 @@ export const Footer = () => {
                                     Pickup near me
                                 </a>
                                 <a href="#" className="hover:text-primary-600 transition-colors">
-                                    About Uber Eats
+                                    About Snap Eats
                                 </a>
 
                                 <div className="flex items-center mt-2 hover:text-primary-600 transition-colors cursor-pointer">

@@ -1,10 +1,10 @@
 interface SavingsSectionProps {
     title: string;
     message: string;
-    imageSrc: string;
+    imageUrls: string;
 }
 
-export const OfferSection = ({ title, message, imageSrc }: SavingsSectionProps) => {
+export const OfferSection = ({ title, message, imageUrls }: SavingsSectionProps) => {
     return (
         <div className="mb-8 w-full flex flex-col items-start">
             <div className="md:w-1/2">
@@ -16,10 +16,10 @@ export const OfferSection = ({ title, message, imageSrc }: SavingsSectionProps) 
                             Join now
                         </button>
                     </div>
-                    {imageSrc ? (
+                    {imageUrls ? (
                     
                     <div className="mt-4 h-20 w-20"> 
-                    <img src={imageSrc} alt="Description of image" className="w- h-auto rounded-md" />
+                    <img src={imageUrls} alt="Description of image" className="w- h-auto rounded-md" />
                 </div>
                     ):(
                         <div className="h-20 w-20 rounded-full flex items-center justify-center bg-white shadow-md ml-4">

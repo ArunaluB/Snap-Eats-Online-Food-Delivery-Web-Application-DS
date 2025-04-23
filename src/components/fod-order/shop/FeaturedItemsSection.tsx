@@ -1,4 +1,4 @@
-import { FeaturedItem } from "../fod-order-types";
+import { FeaturedItem } from "../../../utils/fod-order-types";
 
 interface FeaturedItemsSectionProps {
     featuredItems: FeaturedItem[];
@@ -17,7 +17,7 @@ export const FeaturedItemsSection = ({ featuredItems, onClickedMenuItem }: Featu
                         </div>
                         <div className="relative h-32 mb-2">
                             <img
-                                src={item.imageSrc}
+                                src={item.imageUrls}
                                 className="rounded-lg object-cover w-full h-full"
                                 alt={item.title}
                             />
@@ -32,7 +32,7 @@ export const FeaturedItemsSection = ({ featuredItems, onClickedMenuItem }: Featu
                         <div className="flex items-center gap-1 text-sm text-gray-500">
                             <span>{item.rating}</span>
                             <span className="material-symbols-outlined text-xs text-amber-500">star</span>
-                            <span>({item.reviews})</span>
+                            <span>({item.reviews.length})</span>
                         </div>
                         <div className="text-sm text-gray-500">LKR {item.price} • 40 min</div>
                     </div>

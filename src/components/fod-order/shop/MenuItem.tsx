@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { MenuItemProps } from '../../../utils/fod-order-types';
 
 export const MenuItem: React.FC<MenuItemProps> = ({ item, onClickedMenuItem }) => {
     return (
@@ -9,14 +10,14 @@ export const MenuItem: React.FC<MenuItemProps> = ({ item, onClickedMenuItem }) =
                 <div className="flex items-center gap-1 text-sm text-gray-500">
                     <span>{item.rating}</span>
                     <span className="material-symbols-outlined text-xs text-amber-500">star</span>
-                    <span>({item.reviews})</span>
+                    <span>({item.reviews.length})</span>
                 </div>
                 <p className="text-sm text-gray-500 mt-2">{item.description}</p>
                 <div className="text-sm text-gray-500 mt-1">LKR {item.price}</div>
             </div>
             <div className="relative h-24 w-24">
                 <img
-                    src={item.imageSrc}
+                    src={item.imageUrls}
                     className="rounded-lg object-cover w-full h-full"
                     alt={item.title}
                 />

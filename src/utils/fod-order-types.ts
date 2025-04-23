@@ -3,11 +3,23 @@ export interface MenuItem {
     id: string;
     title: string;
     rating: number;
-    reviews: number;
     description: string;
     price: number;
-    imageSrc: string;
-    category: string; 
+    imageUrls: string;
+    category: string;
+
+    reviews: Review[];
+    restaurantId: string;
+    name: string;
+    dietaryTags: string[];
+    calories: number;
+    customizationOptions: string[];
+    discountPrice: number;
+    createdAt: string;
+    updatedAt: string;
+    preparationTime: number;
+    active: boolean;
+    available: boolean;
 }
 
 // Extend MenuItem for FeaturedItem to include additional property
@@ -23,7 +35,7 @@ export interface MenuItemProps {
 
 export type RestaurantDetails = {
     name: string;
-    imageSrc: string;
+    imageUrls: string;
     logoSrc: string;
     rating: number;
     deliveryDetails: string;
@@ -166,4 +178,58 @@ export interface CartData {
     };
     items: CartItem[];
     subtotal: number;
+}
+
+//for final order stage
+
+interface Review {
+    id: string;
+    userId: string;
+    userName: string;
+    targetId: string;
+    comment: string;
+    rating: number;
+    createdAt: string;
+    updatedAt: string;
+    active: boolean;
+}
+
+interface OrderItem {
+    menuItem: MenuItem;
+    quantity: number;
+    customizations: string[];
+    totalPrice: number;
+    totalDiscount: number;
+    netTotalPrice: number;
+}
+
+interface Restaurant {
+    id: string;
+    name: string;
+    address: AddressDTO;
+    cuisineType: string;
+    phoneNumber: string;
+    email: string;
+    averageRating: number;
+    reviewCount: number;
+    estimatedDeliveryTime: number;
+    deliveryFee: number;
+    operatingHours: string[];
+    imageUrls: string[];
+    logoUrl: string;
+    isPromoted: boolean;
+    dietaryPreferences: string[];
+    createdAt: string;
+    updatedAt: string;
+    active: boolean;
+}
+
+export interface CartResponseDTO {
+    id: string;
+    userId: string;
+    restaurant: Restaurant;
+    items: OrderItem[];
+    createdAt: string;
+    updatedAt: string;
+    active: boolean;
 }

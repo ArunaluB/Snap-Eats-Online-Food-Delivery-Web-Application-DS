@@ -14,7 +14,7 @@ export const UserNavBar = () => {
                         </button>
                         <div className="flex items-center">
                             <span className="font-bold text-lg">Snap Eats</span>
-                            {/* Next: "Add Uber Eats logo svg" */}
+                            {/* Next: "Add Snap Eats logo svg" */}
                         </div>
                     </div>
 
@@ -34,7 +34,7 @@ export const UserNavBar = () => {
                                 <span className="material-symbols-outlined text-gray-500 mr-2">search</span>
                                 <input
                                     type="text"
-                                    placeholder="Search Uber Eats"
+                                    placeholder="Search Snap Eats"
                                     className="bg-transparent outline-none w-full text-sm"
                                 />
                             </div>

@@ -16,7 +16,7 @@
 //             reviews: 582,
 //             description: 'Featuring our signature chili chicken patty topped with cheese',
 //             price: 9.50,
-//             imageSrc: 'https://s7d1.scene7.com/is/image/mcdonalds/mcdonalds-Quarter-Pounder-with-Cheese:1-4-product-tile-desktop',
+//             imageUrls: 'https://s7d1.scene7.com/is/image/mcdonalds/mcdonalds-Quarter-Pounder-with-Cheese:1-4-product-tile-desktop',
 //             category: ""
 //         },
 //         {
@@ -26,7 +26,7 @@
 //             reviews: 432,
 //             description: 'Features our signature chili chicken, cheese combination breaded...',
 //             price: 5.50,
-//             imageSrc: 'https://s7d1.scene7.com/is/image/mcdonalds/mcdonalds-Quarter-Pounder-with-Cheese:1-4-product-tile-desktop',
+//             imageUrls: 'https://s7d1.scene7.com/is/image/mcdonalds/mcdonalds-Quarter-Pounder-with-Cheese:1-4-product-tile-desktop',
 //             category: ""
 //         },
 //         {
@@ -36,7 +36,7 @@
 //             reviews: 877,
 //             description: 'Quarter pound of juicy flame-grilled beef topped with...',
 //             price: 11.99,
-//             imageSrc: 'https://s7d1.scene7.com/is/image/mcdonalds/mcdonalds-Quarter-Pounder-with-Cheese:1-4-product-tile-desktop',
+//             imageUrls: 'https://s7d1.scene7.com/is/image/mcdonalds/mcdonalds-Quarter-Pounder-with-Cheese:1-4-product-tile-desktop',
 //             category: ""
 //         },
 //     ];
@@ -50,7 +50,7 @@
 //             saleType: 'New Item',
 //             description: 'Features two layers of white meat chicken topped with our signature Big King sauce, fresh lettuce, a slice of melted American Cheese and sliced white onions on a soft sesame seed bun.',
 //             price: 9.50,
-//             imageSrc: 'https://static.vecteezy.com/system/resources/previews/036/619/245/non_2x/ai-generated-tasty-beef-burger-isolated-free-png.png',
+//             imageUrls: 'https://static.vecteezy.com/system/resources/previews/036/619/245/non_2x/ai-generated-tasty-beef-burger-isolated-free-png.png',
 //             category: ""
 //         },
 //         {
@@ -61,7 +61,7 @@
 //             saleType: 'Best Seller',
 //             description: "Features two layers of white meat chicken topped with our signature Big King sauce, fresh lettuce, a slice of melted American Cheese and sliced white onions on a soft sesame seed bun.",
 //             price: 5.50,
-//             imageSrc: 'https://static.vecteezy.com/system/resources/previews/036/619/245/non_2x/ai-generated-tasty-beef-burger-isolated-free-png.png',
+//             imageUrls: 'https://static.vecteezy.com/system/resources/previews/036/619/245/non_2x/ai-generated-tasty-beef-burger-isolated-free-png.png',
 //             category: ""
 //         },
 //         {
@@ -72,7 +72,7 @@
 //             saleType: 'Best Seller',
 //             description: "Features two layers of white meat chicken topped with our signature Big King sauce, fresh lettuce, a slice of melted American Cheese and sliced white onions on a soft sesame seed bun.",
 //             price: 5.50,
-//             imageSrc: 'https://static.vecteezy.com/system/resources/previews/036/619/245/non_2x/ai-generated-tasty-beef-burger-isolated-free-png.png',
+//             imageUrls: 'https://static.vecteezy.com/system/resources/previews/036/619/245/non_2x/ai-generated-tasty-beef-burger-isolated-free-png.png',
 //             category: ""
 //         },
 //     ];
@@ -119,8 +119,8 @@ import { useEffect, useState } from "react";
 import { FeaturedItemsSection } from "./FeaturedItemsSection";
 import { MenuItem } from "./MenuItem";
 import { CustomAddOn } from "./CustomAddOn";
-import { MenuItem as MenuItemType, FeaturedItem as FeaturedItemType } from '../fod-order-types';
-import { categoryDisplayNames } from '../fod-order-types';
+import { MenuItem as MenuItemType, FeaturedItem as FeaturedItemType } from '../../../utils/fod-order-types';
+import { categoryDisplayNames } from '../../../utils/fod-order-types';
 
 export const MenuSection = () => {
     const [menuItems, setMenuItems] = useState<MenuItemType[]>([]);
@@ -142,10 +142,10 @@ export const MenuSection = () => {
                 id: item.id,
                 title: item.name,
                 rating: parseFloat(avgRating.toFixed(1)),
-                reviews: totalReviews,
+                reviews: item.reviews,
                 description: item.description || "",
                 price: item.discountPrice ?? item.price,
-                imageSrc: item.imageUrls?.[0] || "https://img.icons8.com/ios/50/image-not-avialable.png", // fallback image
+                imageUrls: item.imageUrls?.[0] || "https://img.icons8.com/ios/50/image-not-avialable.png", // fallback image
                 category: item.category,
               };
             });

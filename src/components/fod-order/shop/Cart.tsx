@@ -111,7 +111,7 @@
 //                         <span className="material-symbols-outlined">menu</span>
 //                     </button>
 //                     <div className="flex items-center">
-//                         <span className="font-bold text-lg">Uber Eats</span>
+//                         <span className="font-bold text-lg">Snap Eats</span>
 //                     </div>
 //                 </div>
 
@@ -138,7 +138,8 @@
 // };
 
 import { useState, useEffect } from 'react';
-import { AddressDTO, CartData } from '../fod-order-types';
+import { AddressDTO, CartData } from '../../../utils/fod-order-types';
+import { OrderSummaryPage } from '../../../pages/fod-order/OrderSummaryPage';
 
 interface CartProps {
     userId: string;
@@ -158,11 +159,7 @@ export const Cart = ({ userId, onClose }: CartProps): JSX.Element => {
     useEffect(() => {
         const fetchCartData = async () => {
             try {
-                const response = await fetch('http://localhost:8222/order-service/api/cart', {
-                    headers: {
-                        'userId': userId, // Pass userId in the header
-                    },
-                });
+                const response = await fetch(`http://localhost:8222/order-service/api/cart/${userId}`);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch cart data');
@@ -257,11 +254,13 @@ export const Cart = ({ userId, onClose }: CartProps): JSX.Element => {
             <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose} />
 
             {/* Cart Sidebar */}
-            <div className="fixed top-0 right-0 h-full lg:min-w-[450px] bg-white shadow-lg z-50 transition-transform duration-300 ease-in-out transform translate-x-0">
+            <div className="fixed top-0 right-0 h-full lg:min-w-[450px] bg-white shadow-lg z-50 transition-transform duration-300 ease-in-out transform translate-x-0 flex flex-col">
+
+                {/* Header */}
                 <div className="flex justify-between items-center px-4 py-3 border-b">
-                    <button 
+                    <button
                         className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                        onClick={onClose} // Trigger onClose when the close button is pressed
+                        onClick={onClose}
                     >
                         <span className="material-symbols-outlined">close</span>
                     </button>
@@ -277,7 +276,7 @@ export const Cart = ({ userId, onClose }: CartProps): JSX.Element => {
                         <img
                             src={cart.restaurant.imageUrls[0]}
                             alt={cart.restaurant.name}
-                            className="w-full h-full object-cover" 
+                            className="w-full h-full object-cover"
                         />
                     </div>
                     <div className="flex-1">
@@ -289,9 +288,9 @@ export const Cart = ({ userId, onClose }: CartProps): JSX.Element => {
                     </button>
                 </div>
 
+                {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto">
                     <div className="px-4 py-3">
-                        {/* Loop through the items in the cart */}
                         {cart.items.map((item, index) => (
                             <div key={index} className="flex items-center justify-between mb-4 border-b pb-4">
                                 <div className="flex items-center">
@@ -299,7 +298,7 @@ export const Cart = ({ userId, onClose }: CartProps): JSX.Element => {
                                         <img
                                             src={item.menuItem.imageUrls[0]}
                                             alt={item.menuItem.name}
-                                            className="w-full h-full object-cover" 
+                                            className="w-full h-full object-cover"
                                         />
                                     </div>
                                     <div>
@@ -309,14 +308,14 @@ export const Cart = ({ userId, onClose }: CartProps): JSX.Element => {
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     {itemCounts[item.menuItem.id] > 1 ? (
-                                        <button 
+                                        <button
                                             className="p-1 hover:bg-gray-100 rounded border transition-colors"
                                             onClick={() => handleItemCountChange(item.menuItem.id, itemCounts[item.menuItem.id] - 1)}
                                         >
                                             <span className="material-symbols-outlined">remove</span>
                                         </button>
                                     ) : (
-                                        <button 
+                                        <button
                                             className="p-1 hover:bg-gray-100 rounded border transition-colors"
                                             onClick={() => removeItemFromCart(item.menuItem.id)}
                                         >
@@ -324,7 +323,7 @@ export const Cart = ({ userId, onClose }: CartProps): JSX.Element => {
                                         </button>
                                     )}
                                     <span className="font-medium">{itemCounts[item.menuItem.id]}</span>
-                                    <button 
+                                    <button
                                         className="p-1 hover:bg-gray-100 rounded border transition-colors"
                                         onClick={() => handleItemCountChange(item.menuItem.id, itemCounts[item.menuItem.id] + 1)}
                                     >
@@ -346,27 +345,37 @@ export const Cart = ({ userId, onClose }: CartProps): JSX.Element => {
                         </div>
 
                         {/* Cart Summary */}
-                        <div className="flex justify-between py-2 font-bold">
-                            <span>Subtotal</span>
-                            <span>{subtotal} LKR</span>
+                        <div className="bg-gray-50 rounded-lg p-4 shadow-sm space-y-3">
+                            <div className="flex justify-between text-gray-700">
+                                <span>Subtotal</span>
+                                <span>{subtotal} LKR</span>
+                            </div>
+
+                            <div className="flex justify-between text-blue-600 font-medium">
+                                <span>Discount</span>
+                                <span>-{totalDiscount} LKR</span>
+                            </div>
+
+                            <div className="flex justify-between text-black text-lg font-bold border-t pt-3">
+                                <span>Net Total</span>
+                                <span>{netTotalPrice} LKR</span>
+                            </div>
+
+                            <div className="flex justify-between items-center text-sm text-gray-500">
+                                <span>Estimated Preparation Time</span>
+                                <span className="flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-base text-gray-400">schedule</span>
+                                    {longestPreparationTime} min
+                                </span>
+                            </div>
                         </div>
-                        <div className="flex justify-between py-2 font-bold">
-                            <span>Discount</span>
-                            <span>{totalDiscount} LKR</span>
-                        </div>
-                        <div className="flex justify-between py-2 font-bold">
-                            <span>Net Total</span>
-                            <span>{netTotalPrice} LKR</span>
-                        </div>
-                        <div className="flex justify-between py-2 font-bold">
-                            <span>Longest Preparation Time</span>
-                            <span>{longestPreparationTime} min</span>
-                        </div>
+
                     </div>
                 </div>
 
+                {/* Checkout Button */}
                 <div className="px-4 py-4 border-t">
-                    <button className="w-full bg-black text-white py-3 rounded-lg font-bold hover:bg-gray-900 transform hover:scale-[1.01] transition-all">
+                    <button className="w-full bg-black text-white py-3 rounded-lg font-bold hover:bg-gray-900 transform hover:scale-[1.01] transition-all" onClick={() => window.location.href = `/fod-order/order-summary/${userId}`}>
                         Go to checkout
                     </button>
                 </div>

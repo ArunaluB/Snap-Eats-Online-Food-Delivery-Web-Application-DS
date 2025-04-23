@@ -1,14 +1,14 @@
 interface HeroSectionProps {
-    imageSrc: string;
+    imageUrls: string;
     logoSrc: string;
     name: string;
 }
 
-export const HeroSection = ({ imageSrc, logoSrc, name }: HeroSectionProps) => {
+export const HeroSection = ({ imageUrls, logoSrc, name }: HeroSectionProps) => {
     return (
         <div className="relative h-64 overflow-hidden">
             <img
-                src={imageSrc}
+                src={imageUrls}
                 className="w-full object-cover h-full"
                 alt={`${name} banner`}
             />
