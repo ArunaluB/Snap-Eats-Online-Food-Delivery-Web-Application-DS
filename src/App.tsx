@@ -9,6 +9,7 @@ import RestaurantProfile from './restaurant/RestaurantProfile';
 import AddMenuItem from './restaurant/AddMenuItem';
 import MenuItemsTable from './restaurant/MenuItemsTable';
 import PublicMenu from './restaurant/PublicMenu';
+import OrdersPage from './restaurant/OrdersPage';
 
 export function App() {
   return (
@@ -34,7 +35,7 @@ export function App() {
             <Route path="/restaurant/menu" element={<AddMenuItem/>} />
             <Route path="/restaurant/viewmenus" element={<MenuItemsTable/>} />
             <Route path="/restaurant/public-menu" element={<PublicMenu />} />
-
+            <Route path="/restaurant/orders" element={<OrdersPage/>} />
           </Routes>
         </main>
       </div>

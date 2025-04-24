@@ -34,28 +34,47 @@ export default function MenuItemsTable() {
 
   const handleModalUpdate = async (updatedItem: MenuItem): Promise<void> => {
     try {
+      const payload = {
+        name: updatedItem.name,
+        description: updatedItem.description,
+        price: updatedItem.price,
+        discountPrice: updatedItem.discountPrice,
+        isAvailable: updatedItem.available,
+        isActive: updatedItem.active,
+        category: updatedItem.category,
+        restaurantId: updatedItem.restaurantId,
+        imageUrls: updatedItem.imageUrls,
+        dietaryTags: updatedItem.dietaryTags,
+        calories: updatedItem.calories,
+        customizationOptions: updatedItem.customizationOptions,
+        preparationTime: updatedItem.preparationTime
+      };
+  
+      console.log("Sending update payload:", payload);
+  
       const res = await fetch(
         `http://localhost:8222/restaurant-service/api/menu-items/${updatedItem.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedItem),
+          body: JSON.stringify(payload),
         }
       );
-
+  
       if (!res.ok) throw new Error("Update failed");
       alert("Menu item updated!");
-
+  
       setItems((prev) =>
         prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
       );
-
+  
       setEditingItem(null);
     } catch (error) {
       console.error(error);
       alert("Error updating menu item.");
     }
   };
+  
 
   if (loading) return <p className="text-center">Loading menu items...</p>;
 
@@ -76,6 +95,7 @@ export default function MenuItemsTable() {
               <th className="px-6 py-3">Tags</th>
               <th className="px-6 py-3">Calories</th>
               <th className="px-6 py-3">Customizations</th>
+              <th className="px-6 py-3">Preparation Time</th>
               <th className="px-6 py-3">Update</th>
             </tr>
           </thead>
@@ -120,6 +140,7 @@ export default function MenuItemsTable() {
                 <td className="px-6 py-4">
                   {item.customizationOptions.join(", ")}
                 </td>
+                <td className="px-6 py-4">{item.preparationTime} min</td>
                 <td className="px-6 py-4">
                   <button
                     className="text-sm px-4 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"

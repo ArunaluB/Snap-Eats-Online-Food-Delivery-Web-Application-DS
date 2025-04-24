@@ -13,7 +13,8 @@ export default function AddMenuItem() {
         customizationOptions: [""],
         discountWhole: "",
         discountDecimal: "",
-        restaurantId: "67fde55233027910028186e3", 
+        preparationTime: "",
+        restaurantId: "67fde55233027910028186e3",
     });
 
     const handleChange = (
@@ -52,14 +53,15 @@ export default function AddMenuItem() {
             category: form.category,
             isAvailable: form.isAvailable,
             imageUrls: [
-              "https://via.placeholder.com/300"
+                "https://via.placeholder.com/300"
             ],
             dietaryTags: form.dietaryTags.filter((tag) => tag.trim() !== ""),
             calories: parseInt(form.calories),
             customizationOptions: form.customizationOptions.filter((o) => o.trim() !== ""),
             discountPrice,
-          };
-          
+            preparationTime: parseInt(form.preparationTime),
+        };
+
 
         try {
             const res = await fetch("http://localhost:8222/restaurant-service/api/menu-items", {
@@ -163,6 +165,16 @@ export default function AddMenuItem() {
                         <input key={idx} type="text" value={opt} onChange={(e) => handleListChange("customizationOptions", idx, e.target.value)} className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300 my-1" />
                     ))}
                     <button type="button" onClick={() => handleAddToList("customizationOptions")} className="text-blue-600 text-sm">+ Add option</button>
+                </div>
+                <div>
+                    <label className="font-medium block">Preparation Time (minutes)</label>
+                    <input
+                        type="number"
+                        name="preparationTime"
+                        value={form.preparationTime}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+                    />
                 </div>
 
                 {/* Submit */}

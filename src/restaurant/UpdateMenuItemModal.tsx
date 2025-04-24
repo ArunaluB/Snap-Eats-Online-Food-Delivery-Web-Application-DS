@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import ActiveToggle from "./ActiveToggle"; // adjust path as needed
-import {MenuItem} from "./MenuItem";
-
+import ActiveToggle from "./ActiveToggle";
+import { MenuItem } from "./MenuItem";
 
 interface UpdateMenuItemModalProps {
   item: MenuItem;
@@ -15,15 +14,16 @@ export default function UpdateMenuItemModal({ item, onClose, onUpdate }: UpdateM
     description: "",
     price: "",
     category: "",
-    available: true,
-    active: true,
+    isAvailable: true, // ✅ instead of 'available'
+    isActive: true,
     discountWhole: "",
     discountDecimal: "",
-    imageUrls: [],
+    imageUrls: [] as string[],
     dietaryTags: [""],
     calories: "",
     customizationOptions: [""],
-    restaurantId: ""
+    restaurantId: "",
+    preparationTime: ""
   });
 
   useEffect(() => {
@@ -33,27 +33,28 @@ export default function UpdateMenuItemModal({ item, onClose, onUpdate }: UpdateM
       description: item.description,
       price: item.price.toString(),
       category: item.category,
-      available: item.available,
-      active: item.active,
+      isAvailable: item.available,
+      isActive: item.active,
       discountWhole: whole,
       discountDecimal: decimal,
-      imageUrls: [],
+      imageUrls: item.imageUrls ?? [],
       dietaryTags: item.dietaryTags,
       calories: item.calories.toString(),
       customizationOptions: item.customizationOptions,
-      restaurantId: item.restaurantId
+      restaurantId: item.restaurantId,
+      preparationTime: item.preparationTime.toString()
     });
   }, [item]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const target = e.target as HTMLInputElement;
+    const target = e.target;
     const { name, value, type } = target;
-    setForm({
-      ...form,
-      [name]: type === "checkbox" ? target.checked : value
-    });
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? (target as HTMLInputElement).checked : value
+    }));
   };
 
   const handleListChange = (field: string, index: number, value: string) => {
@@ -68,21 +69,27 @@ export default function UpdateMenuItemModal({ item, onClose, onUpdate }: UpdateM
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     const updatedItem: MenuItem = {
       ...item,
       name: form.name,
       description: form.description,
       price: parseFloat(form.price),
       category: form.category,
-      available: form.available,
-      active: form.active,
+      available: form.isAvailable,
+      active: form.isActive,
       imageUrls: form.imageUrls,
-      dietaryTags: form.dietaryTags.filter(tag => tag.trim() !== ""),
+      dietaryTags: form.dietaryTags.filter((tag) => tag.trim() !== ""),
       calories: parseInt(form.calories),
-      customizationOptions: form.customizationOptions.filter(o => o.trim() !== ""),
+      customizationOptions: form.customizationOptions.filter((opt) => opt.trim() !== ""),
       discountPrice: parseFloat(`${form.discountWhole || 0}.${form.discountDecimal || 0}`),
-      restaurantId: form.restaurantId
+      preparationTime: parseInt(form.preparationTime),
+      restaurantId: form.restaurantId,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+      id: item.id
     };
+
     onUpdate(updatedItem);
   };
 
@@ -125,23 +132,26 @@ export default function UpdateMenuItemModal({ item, onClose, onUpdate }: UpdateM
               <option value="APPETIZER">Appetizer</option>
               <option value="BEVERAGE">Beverage</option>
               <option value="DESSERT">Dessert</option>
+              <option value="SIDE">Side</option>
             </select>
           </div>
           <div>
+            <label className="font-medium block">Preparation Time (minutes)</label>
+            <input type="number" name="preparationTime" value={form.preparationTime} onChange={handleChange} className="w-full px-3 py-2 border rounded" />
+          </div>
+          <div>
             <label className="flex items-center gap-2">
-              <input type="checkbox" name="isAvailable" checked={form.available} onChange={handleChange} />
+              <input type="checkbox" name="isAvailable" checked={form.isAvailable} onChange={handleChange} />
               Available
             </label>
           </div>
-
           <div>
             <label className="font-medium block">Active</label>
             <ActiveToggle
-              active={form.active}
+              active={form.isActive}
               onToggle={(newState) => setForm((prev) => ({ ...prev, active: newState }))}
             />
           </div>
-
           <div>
             <label className="font-medium block">Image URLs</label>
             {form.imageUrls.map((url, idx) => (
