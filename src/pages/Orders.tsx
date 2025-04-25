@@ -285,7 +285,7 @@ export function Orders(): JSX.Element {
 
   if (loading) {
     return (
-      <div className="mb-16">
+      <div className="mt-10 mb-16 ml-8 mr-8">
         <h2 className="text-2xl font-bold mb-4 text-gray-800">Your Orders</h2>
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="flex flex-col items-center justify-center">
@@ -330,7 +330,7 @@ export function Orders(): JSX.Element {
 
   if (orders.length === 0) {
     return (
-      <div className="mb-16">
+      <div className="mt-10 mb-16 ml-8 mr-8">
         <h2 className="text-2xl font-bold mb-4 text-gray-800">Your Orders</h2>
         <motion.div 
           className="bg-white rounded-xl shadow-lg overflow-hidden"
@@ -377,7 +377,7 @@ export function Orders(): JSX.Element {
   }
 
   return (
-    <div className="mb-16">
+    <div className="mt-10 mb-16 ml-8 mr-8 ">
       {usingMockData && (
         <motion.div 
           initial={{ opacity: 0, y: -10 }}

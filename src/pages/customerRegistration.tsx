@@ -1,6 +1,8 @@
+
 import { Mail, Lock, User, Phone } from "lucide-react";
 import { useState, ChangeEvent } from "react";
-import BackgroundAnimation from "./BackgroundAnimation";
+import BackgroundAnimation from './BackgroundAnimation';  // Import your animation component
+import React from "react";
 
 export function CustomerRegister() {
   const [formData, setFormData] = useState({
@@ -24,9 +26,9 @@ export function CustomerRegister() {
   ];
 
   return (
-    <div className="relative max-h-screen flex items-center justify-center py-10">
+    <div className="relative min-h-screen flex items-center justify-center py-10">
       <BackgroundAnimation /> 
-      <div className="w-full max-w-xl bg-gradient-to-r from-yellow-100 to-blue-100 p-4 md:p-6 justify-between items-center shadow-2xl rounded-lg">
+      <div className="relative z-10 bg-white/70 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-full max-w-md">
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">
           Customer Registration
         </h2>
@@ -52,5 +54,5 @@ export function CustomerRegister() {
       </div>
     </div>
   );
-
 }
+
