@@ -33,6 +33,7 @@ const NOTIFICATION_AUDIO_SRC = '/sweet_but_psycho.mp3';
 
 export default function Dashboard() {
   const [isOnline, setIsOnline] = useState(false);
+  const [isToggling, setIsToggling] = useState(false); 
   const [stompClient, setStompClient] = useState<Client | null>(null);
   const [driverId, setDriverId] = useState<number>(1);
   const [currentLocation, setCurrentLocation] = useState<Location>({
@@ -325,7 +326,48 @@ export default function Dashboard() {
     }
   }, [orderStatus]);
 
-  const toggleStatus = () => setIsOnline(!isOnline);
+  //const toggleStatus = () => setIsOnline(!isOnline);
+  // Toggle online/offline status with API call
+  const toggleStatus = async () => {
+    if (isToggling) return;
+    setIsToggling(true);
+    const newStatus = !isOnline;
+    setIsOnline(newStatus);
+
+    try {
+      const response = await fetch('http://localhost:8080/api/drivermanager/api/driver/available', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: driverId,
+          available: newStatus,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update driver status: ${response.statusText}`);
+      }
+
+      console.log('Driver status updated successfully:', { id: driverId, available: newStatus });
+      notificationService.show(
+        'Success',
+        newStatus ? 'You are now online and ready to receive orders!' : 'You are now offline.',
+        { tag: 'status-update-success' }
+      );
+    } catch (error) {
+      console.error('Error updating driver status:', error);
+      setIsOnline(!newStatus); 
+      notificationService.show(
+        'Error',
+        `Failed to update ${newStatus ? 'online' : 'offline'} status. Please try again.`,
+        { tag: 'status-update-error' }
+      );
+    } finally {
+      setIsToggling(false);
+    }
+  };
 
   const handleOrderClick = (order: Order) => {
     setSelectedOrder(order);

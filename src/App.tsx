@@ -10,6 +10,12 @@ import { UserNavBar } from './components/fod-order/UserNavBar';
 import { OrderSummaryPage } from './pages/fod-order/OrderSummaryPage';
 
 export function App() {
+
+  return <Router>
+    <div className=" flex-col min-h-screen bg-gray-100">
+      <Navbar />
+      <main>
+
   return (
     <Router>
       <LayoutWrapper />
@@ -27,6 +33,7 @@ function LayoutWrapper() {
     <div className="flex flex-col min-h-screen bg-gray-100">
       {isUserSection ? <UserNavBar /> : <Navbar />}
       <main className="flex-1 container mx-auto px-4 py-4">
+
         <Routes>
           <Route path="/" element={
             <EnhancedLayout>
