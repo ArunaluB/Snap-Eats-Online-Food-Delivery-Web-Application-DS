@@ -1,6 +1,7 @@
+
 import { Mail, Lock } from "lucide-react";
-import React from "react";
 import { useState } from "react";
+import BackgroundAnimation from "./BackgroundAnimation";
 
 export function Login() {
   const [formData, setFormData] = useState({ identifier: "", password: "" });
@@ -9,19 +10,12 @@ export function Login() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center py-10">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
-        style={{
-          backgroundImage:
-            "url('https://static.vecteezy.com/system/resources/previews/051/740/895/non_2x/traditional-indian-cuisine-displayed-on-rustic-tabletop-photo.jpg')",
-          filter: "blur(1px) brightness(0.3)",
-        }}
-      />
-      <div className="relative z-10 bg-white/70 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-full max-w-md space-y-6 animate-fade-in">
+    <div className="relative max-h-screen flex items-center justify-center py-10">
+      <BackgroundAnimation />
+      <div className="w-full max-w-xl bg-gradient-to-r from-yellow-100 to-blue-100 p-4 md:p-6 justify-between items-center shadow-2xl rounded-lg">
         <h2 className="text-3xl font-bold text-center text-gray-900">Login</h2>
         <form className="space-y-5">
-          <div className="relative">
+          <div className="relative mt-8">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               name="identifier"
@@ -45,7 +39,7 @@ export function Login() {
             Login
           </button>
         </form>
-        <p className="text-center text-sm text-gray-500">
+        <p className="text-center text-sm text-gray-500 mt-4">
           Don’t have an account?{" "}
           <a href="#" className="text-violet-600 font-medium">
             Sign up
