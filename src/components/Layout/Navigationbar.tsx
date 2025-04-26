@@ -1,7 +1,7 @@
 import { BellIcon } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
-export function Navbar() {
+export function Navigationbar() {
   const location = useLocation();
 
   const isActive = (path: string) =>

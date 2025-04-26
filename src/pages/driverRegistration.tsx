@@ -1,10 +1,11 @@
-
 import { Mail, Lock, User, Phone, Car, IdCard, MapPin } from "lucide-react";
 import { useState, ChangeEvent, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import BackgroundAnimation from "./BackgroundAnimation";
 
 export function DriverRegister() {
   const [step, setStep] = useState(1);
+  const navigate = useNavigate(); // 👈 Add useNavigate for redirection
 
   const [formData, setFormData] = useState({
     id: "",
@@ -45,13 +46,18 @@ export function DriverRegister() {
     }
   };
 
-  const nextStep = () => setStep((prev) => Math.min(prev + 1, 3));
+  const nextStep = () => setStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
-    // Handle final submission logic here
+
+    // Show popup
+    alert("Registering. Verification will complete within 48 hours.");
+
+    // Redirect to home after popup
+    navigate("/");
   };
 
   const textFields = [
@@ -97,7 +103,7 @@ export function DriverRegister() {
   return (
     <div className="relative min-h-screen flex mt-4 items-center justify-center py-10">
       <BackgroundAnimation />
-      <div className="w-full max-w-xl bg-gradient-to-r from-yellow-100 to-blue-100 p-4 md:p-6 justify-between items-center shadow-2xl rounded-lg">
+      <div className="w-full max-w-xl bg-gradient-to-r from-yellow-100 to-blue-100 p-4 md:p-6 shadow-2xl rounded-lg">
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">
           Driver Registration
         </h2>
@@ -107,9 +113,7 @@ export function DriverRegister() {
           {step === 1 &&
             textFields
               .filter(({ name }) =>
-                ["username", "firstName", "lastName", "email", "phoneNumber", "password"].includes(
-                  name
-                )
+                ["username", "firstName", "lastName", "email", "phoneNumber", "password"].includes(name)
               )
               .map(({ name, label, icon, type = "text" }) => (
                 <div className="relative" key={name}>
@@ -131,15 +135,7 @@ export function DriverRegister() {
           {step === 2 &&
             textFields
               .filter(({ name }) =>
-                [
-                  "vehicleType",
-                  "vehicleNo",
-                  "vehicleModel",
-                  "vehicleColor",
-                  "licencePlate",
-                  "licenceNumber",
-                  "licenceExpiryDate",
-                ].includes(name)
+                ["vehicleType", "vehicleNo", "vehicleModel", "vehicleColor", "licencePlate", "licenceNumber", "licenceExpiryDate"].includes(name)
               )
               .map(({ name, label, icon, isSelect, type = "text" }) => (
                 <div className="relative" key={name}>
@@ -173,7 +169,7 @@ export function DriverRegister() {
                 </div>
               ))}
 
-          {/* Step 3 - Documents */}
+          {/* Step 3 - NIC & Address */}
           {step === 3 && (
             <>
               <div className="relative col-span-full">
@@ -201,7 +197,12 @@ export function DriverRegister() {
                   className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
                 />
               </div>
+            </>
+          )}
 
+          {/* Step 4 - Upload Documents */}
+          {step === 4 && (
+            <>
               {fileFields.map((field) => (
                 <div key={field} className="col-span-full">
                   <label className="block mb-1 text-sm font-medium text-gray-600 capitalize">
@@ -229,7 +230,7 @@ export function DriverRegister() {
                 Previous
               </button>
             )}
-            {step < 3 ? (
+            {step < 4 ? (
               <button
                 type="button"
                 onClick={nextStep}
