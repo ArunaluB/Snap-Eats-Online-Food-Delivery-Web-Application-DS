@@ -76,7 +76,7 @@ export const ShopMainPage: React.FC = () => {
 
     return (
         <div id="webcrumbs">
-            <div className="bg-white w-full max-w-7xl mx-auto rounded-lg overflow-hidden">
+            <div className="bg-white w-full  mx-auto rounded-lg overflow-hidden">
                 <HeroSection {...restaurantDetails} />
                 <InfoSection {...restaurantDetails} />
                 <div className="flex flex-col md:flex-row">
