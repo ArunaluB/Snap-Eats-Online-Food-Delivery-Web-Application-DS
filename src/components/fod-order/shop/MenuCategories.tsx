@@ -44,6 +44,7 @@
 
 import React, { useEffect, useState } from "react";
 import { categoryDisplayNames, MenuCategoriesProps } from '../../../utils/fod-order-types';
+import toast from "react-hot-toast";
 
 export const MenuCategories: React.FC<MenuCategoriesProps> = ({ restaurantId, restaurantName, MenuItemCount }) => {
     const [categories, setCategories] = useState<string[]>([]);
@@ -61,6 +62,7 @@ export const MenuCategories: React.FC<MenuCategoriesProps> = ({ restaurantId, re
                 setCategories(data);
             } catch (err: any) {
                 setError(err.message || "An error occurred");
+                toast.error(err.message || "An error occurred while fetching categories");
             } finally {
                 setLoading(false);
             }

@@ -7,6 +7,8 @@ import { MenuSection } from "../../components/fod-order/shop/MenuSection";
 import { OfferSection } from "../../components/fod-order/shop/OfferSection";
 import { Footer } from "../../components/fod-order/Footer";
 import { MenuCategoriesProps } from "../../utils/fod-order-types";
+import Loading from "../../components/fod-order/general/Loading";
+import toast from "react-hot-toast";
 
 // Define the shape of restaurant data from API
 interface RestaurantResponseDTO {
@@ -64,6 +66,7 @@ export const ShopMainPage: React.FC = () => {
                 setRestaurantDetails(details);
             } catch (error) {
                 console.error("Failed to fetch restaurant details:", error);
+                toast.error("Failed to fetch restaurant details. Please try again later.");
             }
         };
 
@@ -71,7 +74,7 @@ export const ShopMainPage: React.FC = () => {
     }, []);
 
     if (!restaurantDetails) {
-        return <div>Loading...</div>;
+        return <Loading/>;
     }
 
     return (

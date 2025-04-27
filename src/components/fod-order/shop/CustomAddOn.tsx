@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { toast } from 'react-hot-toast'; // Import toast from react-hot-toast
 
 interface CustomAddOnProps {
     selectedItem: {
@@ -19,6 +20,7 @@ export const CustomAddOn: React.FC<CustomAddOnProps> = ({ selectedItem, onClose 
 
     const titleRef = useRef<HTMLHeadingElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
+    
 
     const addOns = [
         { name: 'Cheese Slice', price: 167.80 },
@@ -58,20 +60,20 @@ export const CustomAddOn: React.FC<CustomAddOnProps> = ({ selectedItem, onClose 
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "userId": "user-123",  // Replace with actual user ID
+                    "userId": "680c87816a8cc452a6a53991",  // Replace with actual user ID
                 },
                 body: JSON.stringify(payload),
             });
 
             if (response.ok) {
-                console.log("Item added to cart successfully");
+                toast.success("Item added to cart successfully!", { duration: 5000 });
                 onClose();  // Optional: Close the popup after adding to the cart
             } else {
                 const errorData = await response.json();
-                console.error("Failed to add to cart:", errorData);
+                toast.error("Failed to add item to cart. Please try again.", { duration: 5000 });
             }
         } catch (err) {
-            console.error("Error adding to cart:", err);
+            toast.error("Failed to add item to cart. Please try again.", { duration: 5000 });
         }
     };
 

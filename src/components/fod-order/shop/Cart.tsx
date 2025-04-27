@@ -140,6 +140,7 @@
 import { useState, useEffect } from 'react';
 import { AddressDTO, CartData } from '../../../utils/fod-order-types';
 import { OrderSummaryPage } from '../../../pages/fod-order/OrderSummaryPage';
+import Loading from '../general/Loading';
 
 interface CartProps {
     userId: string;
@@ -242,7 +243,7 @@ export const Cart = ({ userId, onClose }: CartProps): JSX.Element => {
     };
 
     if (!cart) {
-        return <div>Loading...</div>;
+        return <Loading/>
     }
 
     const { subtotal, totalDiscount, netTotalPrice } = calculateTotals();
