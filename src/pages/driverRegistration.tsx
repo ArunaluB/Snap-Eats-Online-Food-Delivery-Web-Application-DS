@@ -5,7 +5,7 @@ import BackgroundAnimation from "./BackgroundAnimation";
 
 export function DriverRegister() {
   const [step, setStep] = useState(1);
-  const navigate = useNavigate(); // 👈 Add useNavigate for redirection
+  const navigate = useNavigate(); 
 
   const [formData, setFormData] = useState({
     id: "",

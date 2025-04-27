@@ -1,18 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export const Navbar = () => {
-  const [] = useState(false);
-  const isSignedIn = false;
+  const [user, setUser] = useState<null | { name: string }>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('driver');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const handleSignOut = () => {
+    localStorage.removeItem('driver');
+    setUser(null);
+    navigate('/login'); // Redirect to login after sign out (optional)
+  };
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
+          {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <span className="text-2xl font-bold text-yellow-500 cursor-pointer" onClick={() => navigate("/")}>Snap Eats</span>
+            <span
+              className="text-2xl font-bold text-yellow-500 cursor-pointer"
+              onClick={() => navigate("/")}
+            >
+              Snap Eats
+            </span>
           </div>
+
+          {/* Navigation Links */}
           <div className="flex items-center space-x-8">
             <button onClick={() => navigate("/")} className="text-gray-700 hover:text-yellow-500 font-medium">
               Restaurants
@@ -23,24 +43,38 @@ export const Navbar = () => {
             <button onClick={() => navigate("/partner")} className="text-gray-700 hover:text-yellow-500 font-medium">
               Partner with us
             </button>
-            <button onClick={() => navigate("/About")} className="text-gray-700 hover:text-yellow-500 font-medium">
+            <button onClick={() => navigate("/about")} className="text-gray-700 hover:text-yellow-500 font-medium">
               About
             </button>
           </div>
+
+          {/* Right Side */}
           <div className="flex items-center space-x-4">
-            {!isSignedIn ? (
+            {!user ? (
               <>
-                <button onClick={() => navigate("/login")} className="px-4 py-2 rounded text-gray-700 hover:text-yellow-500 font-medium">
+                <button
+                  onClick={() => navigate("/login")}
+                  className="px-4 py-2 rounded text-gray-700 hover:text-yellow-500 font-medium"
+                >
                   Login
                 </button>
-                <button onClick={() => navigate("/customer-register")} className="px-4 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition">
+                <button
+                  onClick={() => navigate("/customer-register")}
+                  className="px-4 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition"
+                >
                   Sign Up
                 </button>
               </>
             ) : (
-              <button className="px-4 py-2 text-gray-700 hover:text-yellow-500 font-medium">
-                My Account
-              </button>
+              <div className="flex items-center space-x-3">
+                <span className="text-gray-700 font-medium">{user.name}</span>
+                <button
+                  onClick={handleSignOut}
+                  className="px-4 py-2 text-gray-700 hover:text-yellow-500 font-medium"
+                >
+                  Sign Out
+                </button>
+              </div>
             )}
           </div>
         </div>
