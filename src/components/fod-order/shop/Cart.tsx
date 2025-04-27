@@ -227,11 +227,14 @@ export const Cart = ({ userId, onClose }: CartProps): JSX.Element => {
         let netTotalPrice = 0;
 
         cart.items.forEach(item => {
-            const itemTotalPrice = item.menuItem.discountPrice * itemCounts[item.menuItem.id];
-            subtotal += item.menuItem.price * itemCounts[item.menuItem.id];
-            totalDiscount += (item.menuItem.price - item.menuItem.discountPrice) * itemCounts[item.menuItem.id];
+            const count = itemCounts[item.menuItem.id] || 0;
+            const discountPrice = item.menuItem.discountPrice || 0;
+            const price = item.menuItem.price || 0;
+            const itemTotalPrice = Number((discountPrice * count).toFixed(2));
+            subtotal += Number((price * count).toFixed(2));
+            totalDiscount += Number(((price - discountPrice) * count).toFixed(2));
             netTotalPrice += itemTotalPrice;
-        });
+          });
 
         return { subtotal, totalDiscount, netTotalPrice };
     };
@@ -349,17 +352,17 @@ export const Cart = ({ userId, onClose }: CartProps): JSX.Element => {
                         <div className="bg-gray-50 rounded-lg p-4 shadow-sm space-y-3">
                             <div className="flex justify-between text-gray-700">
                                 <span>Subtotal</span>
-                                <span>{subtotal} LKR</span>
+                                <span>{subtotal.toFixed(2)} LKR</span>
                             </div>
 
                             <div className="flex justify-between text-blue-600 font-medium">
                                 <span>Discount</span>
-                                <span>-{totalDiscount} LKR</span>
+                                <span>-{totalDiscount.toFixed(2)} LKR</span>
                             </div>
 
                             <div className="flex justify-between text-black text-lg font-bold border-t pt-3">
                                 <span>Net Total</span>
-                                <span>{netTotalPrice} LKR</span>
+                                <span>{netTotalPrice.toFixed(2)} LKR</span>
                             </div>
 
                             <div className="flex justify-between items-center text-sm text-gray-500">

@@ -419,11 +419,12 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { AddressDTO, CartResponseDTO } from '../../utils/fod-order-types';
+import { AddressDTO, CartResponseDTO,  } from '../../utils/fod-order-types';
 import { PaymentModal } from "../../components/fod-order/shop/PaymentModal";
 import Loading from "../../components/fod-order/general/Loading";
 import toast from "react-hot-toast";
 import { AddressModel } from "../../components/fod-order/shop/AddressModel";
+import { CashOrderConfirmationModal } from "../../components/fod-order/general/CashOrderConfirmationModal";
 
 export const OrderSummaryPage = () => {
     const { userId } = useParams();
@@ -433,9 +434,9 @@ export const OrderSummaryPage = () => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isRedirecting, setIsRedirecting] = useState(false);
     const [redirectError, setRedirectError] = useState<string | null>(null);
+    const [showCashConfirmationModal, setShowCashConfirmationModal] = useState(false);
 
-
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"snap" | "cash" | "card">("snap");
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"snap" | "cash" | "card">("cash");
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [showAddressModal, setShowAddressModal] = useState(false); // New state for AddressModel
     const [userAddress, setUserAddress] = useState<AddressDTO | null>(null); // Store user address
@@ -477,7 +478,56 @@ export const OrderSummaryPage = () => {
         setIsExpanded(!isExpanded);
     };
 
+    // const handleNext = async () => {
+    //     if (selectedPaymentMethod === 'card') {
+    //         setIsRedirecting(true);
+    //         setRedirectError(null);
+    //         try {
+    //             const totalAmount = (
+    //                 (cartResponse?.items.reduce((sum, item) => sum + item.netTotalPrice, 0) || 0) +
+    //                 (cartResponse?.restaurant.deliveryFee || 0)
+    //             );
+    //             const response = await axios.post('http://localhost:8222/order-service/api/payment/create-checkout-session', {
+    //                 amount: Math.round(totalAmount * 100),
+    //                 currency: 'usd',
+    //                 description: `Order from ${cartResponse?.restaurant.name || 'Restaurant'}`,
+    //                 userId: userId,
+    //                 restaurantId: cartResponse?.restaurant.id
+    //             });
+
+    //             if (!response.data.sessionUrl) {
+    //                 toast.error("No session URL returned from backend", { duration: 4000 });
+    //                 throw new Error('No session URL returned from backend');
+    //             }
+    //             window.location.href = response.data.sessionUrl;
+    //         } catch (err: any) {
+    //             const errorMessage = err.response?.data?.error || err.message || 'Failed to initiate checkout. Please try again.';
+    //             setRedirectError(errorMessage);
+    //             console.error('Error initiating checkout:', err);
+    //             toast.error("Failed to initiate checkout. Please try again.", { duration: 4000 });
+    //         } finally {
+    //             setIsRedirecting(false);
+    //         }
+    //     } else {
+    //         alert("Proceeding with other payment methods is not yet implemented.");
+    //     }
+    // };
+
     const handleNext = async () => {
+        // Validate address fields
+        if (!userAddress?.street) {
+            toast.error("Please provide a street address.", { duration: 4000 });
+            return;
+        }
+        if (!userAddress?.city) {
+            toast.error("Please provide a city.", { duration: 4000 });
+            return;
+        }
+        if (!userAddress?.latitude || !userAddress?.longitude) {
+            toast.error("Please select a location on the map.", { duration: 4000 });
+            return;
+        }
+
         if (selectedPaymentMethod === 'card') {
             setIsRedirecting(true);
             setRedirectError(null);
@@ -493,7 +543,6 @@ export const OrderSummaryPage = () => {
                     userId: userId,
                     restaurantId: cartResponse?.restaurant.id
                 });
-                console.log('Checkout session response:', response.data);
                 if (!response.data.sessionUrl) {
                     toast.error("No session URL returned from backend", { duration: 4000 });
                     throw new Error('No session URL returned from backend');
@@ -507,11 +556,62 @@ export const OrderSummaryPage = () => {
             } finally {
                 setIsRedirecting(false);
             }
+        } else if (selectedPaymentMethod === 'cash') {
+            // Show confirmation modal for cash-on-delivery
+            setShowCashConfirmationModal(true);
         } else {
             alert("Proceeding with other payment methods is not yet implemented.");
         }
     };
 
+    const handleConfirmCashOrder = async () => {
+        try {
+            const totalAmount = (
+                (cartResponse?.items.reduce((sum, item) => sum + item.netTotalPrice, 0) || 0) +
+                (cartResponse?.restaurant.deliveryFee || 0)
+            );
+            await axios.post(
+                `http://localhost:8222/order-service/api/orders`,
+                {
+                    userId: userId,
+                    restaurantId: cartResponse?.restaurant.id,
+                    items: cartResponse?.items.map(item => ({
+                      itemId: item.menuItem.id, // Changed from menuItemId to itemId
+                      itemName: item.menuItem.name,
+                      quantity: item.quantity,
+                      unitPrice: (item.netTotalPrice / item.quantity).toFixed(2), // Calculate unit price
+                      totalPrice: item.netTotalPrice.toFixed(2),
+                      customizations: item.customizations
+                    })),
+                    deliveryFee: cartResponse?.restaurant.deliveryFee.toFixed(2) || 0,
+                    taxAmount: 0, // As per UI, taxes are 0
+                    deliveryAddress: {
+                      street: userAddress?.street,
+                      city: userAddress?.city,
+                      state: userAddress?.state,
+                      zipCode: userAddress?.zipCode || null,
+                      landmark: userAddress?.landmark || null
+                    },
+                    orderStatus: "PENDING",
+                    paymentMethod: "CASH",
+                    paymentStatus: "PENDING",
+                    estimatedDeliveryTime: "30-40 mins", // Hardcoded as per example
+                    // orderNotes: userAddress?.in || "" // Use deliveryInstructions if available
+                  },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+                    },
+                  }
+            );
+            toast.success("Order placed successfully!", { duration: 4000 });
+            setShowCashConfirmationModal(false);
+            // Optionally redirect to an order confirmation page
+        } catch (err: any) {
+            console.error('Error placing order:', err);
+            toast.error("Failed to place order. Please try again.", { duration: 4000 });
+        }
+    };
     return (
         <div id="webcrumbs">
             <div className="flex flex-col lg:flex-row gap-4 font-sans">
@@ -657,20 +757,38 @@ export const OrderSummaryPage = () => {
                             {redirectError}
                         </div>
                     )}
-                    <button
+                    {/* <button
                         onClick={handleNext}
                         disabled={isRedirecting}
                         className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-400"
                     >
                         {isRedirecting ? <>Redirecting... <Loading /></> : 'Next'}
+                    </button> */}
+
+                    <button
+                        onClick={handleNext}
+                        disabled={isRedirecting}
+                        className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-400"
+                    >
+                        {isRedirecting ? (
+                            <>Redirecting... <Loading /></>
+                        ) : selectedPaymentMethod === 'cash' ? (
+                            'Place Order'
+                        ) : (
+                            'Next'
+                        )}
                     </button>
 
                     {showAddressModal && (
                         <AddressModel
                             userId={userId || ""}
                             onClose={() => setShowAddressModal(false)}
-                            onSave={() => {
+                            onSave={(data) => {
                                 setShowAddressModal(false);
+                                if (userAddress) {
+                                    userAddress.street = data.street;
+                                    userAddress.city = data.city;
+                                }
                                 toast.success("Address updated successfully!", { duration: 2000 });
                             }}
                         />
@@ -821,6 +939,15 @@ export const OrderSummaryPage = () => {
                                         setShowPaymentModal(false);
                                     }}
                                     currentSelection={selectedPaymentMethod}
+                                />
+                            )}
+                            {showCashConfirmationModal && (
+                                <CashOrderConfirmationModal
+                                    isOpen={showCashConfirmationModal}
+                                    onClose={() => setShowCashConfirmationModal(false)}
+                                    onConfirm={handleConfirmCashOrder}
+                                    cartResponse={cartResponse}
+                                    userAddress={userAddress}
                                 />
                             )}
                         </div>
