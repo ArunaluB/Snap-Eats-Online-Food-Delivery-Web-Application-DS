@@ -10,6 +10,7 @@ import AddMenuItem from './restaurant/AddMenuItem';
 import MenuItemsTable from './restaurant/MenuItemsTable';
 import PublicMenu from './restaurant/PublicMenu';
 import OrdersPage from './restaurant/OrdersPage';
+import MenuItemReviews from './restaurant/MenuItemReviews';
 
 export function App() {
   return (
@@ -36,6 +37,7 @@ export function App() {
             <Route path="/restaurant/viewmenus" element={<MenuItemsTable/>} />
             <Route path="/restaurant/public-menu" element={<PublicMenu />} />
             <Route path="/restaurant/orders" element={<OrdersPage/>} />
+            <Route path="/restaurant/review/:menuItemId" element={<MenuItemReviews />} />
           </Routes>
         </main>
       </div>

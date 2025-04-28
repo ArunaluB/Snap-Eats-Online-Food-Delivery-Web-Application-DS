@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { MenuItem } from "./MenuItem"; 
+import { MenuItem } from "./MenuItem";
+import { useNavigate } from "react-router-dom";
 
 export default function PublicMenu() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [reviewCounts, setReviewCounts] = useState<Record<string, number>>({});
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -13,6 +15,24 @@ export default function PublicMenu() {
         );
         const data = await res.json();
         setItems(data);
+
+        const reviewMap: Record<string, number> = {};
+
+        await Promise.all(
+          data.map(async (item: MenuItem) => {
+            try {
+              const res = await fetch(
+                `http://localhost:8222/restaurant-service/api/reviews/target/${item.id}`
+              );
+              const reviews = await res.json();
+              reviewMap[item.id] = reviews.length;
+            } catch {
+              reviewMap[item.id] = 0;
+            }
+          })
+        );
+
+        setReviewCounts(reviewMap);
       } catch (err) {
         console.error("Failed to fetch menu items", err);
       } finally {
@@ -28,7 +48,7 @@ export default function PublicMenu() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {items
-        .filter((item) => item.available) // ✅ Only show available items
+        .filter((item) => item.available)
         .map((item) => (
           <div
             key={item.id}
@@ -44,10 +64,23 @@ export default function PublicMenu() {
                 {item.name}
               </h3>
               <p className="text-sm text-gray-600 mb-3">{item.description}</p>
-              <div className="flex items-center justify-between text-sm">
+
+              <div className="flex items-center justify-between text-sm text-gray-700">
                 <span className="font-semibold text-gray-900">
                   Rs. {item.price.toFixed(2)}
                 </span>
+
+                <span
+                  className="flex items-center gap-1 text-yellow-600 font-medium cursor-pointer"
+                  onClick={() => navigate(`/restaurant/review/${item.id}`)}
+                >
+                  ⭐ 4.8{" "}
+                  <span className="text-gray-500 text-xs">
+                    ({reviewCounts[item.id] ?? 0})
+                  </span>
+                </span>
+
+
                 {item.discountPrice > 0 && (
                   <span className="text-green-600 font-medium">
                     -{item.discountPrice.toFixed(2)}%
@@ -58,5 +91,5 @@ export default function PublicMenu() {
           </div>
         ))}
     </div>
-  );  
+  );
 }
