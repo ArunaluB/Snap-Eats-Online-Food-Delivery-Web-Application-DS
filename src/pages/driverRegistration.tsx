@@ -1,11 +1,27 @@
-import { Mail, Lock, User, Phone, Car, IdCard, MapPin } from "lucide-react";
-import { useState, ChangeEvent, FormEvent } from "react";
+import { Mail, Lock, User, Phone, Car, IdCard, MapPin, X, Upload } from "lucide-react";
+import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BackgroundAnimation from "./BackgroundAnimation";
+import { uploadToImageKit } from "./imageKit";
+
+function Notification({ message, onClose }: { message: string; onClose: () => void }) {
+  return (
+    <div className="fixed top-4 right-4 z-50 animate-fade-in">
+      <div className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-between max-w-md">
+        <span>{message}</span>
+        <button onClick={onClose} className="ml-4">
+          <X size={20} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export function DriverRegister() {
   const [step, setStep] = useState(1);
-  const navigate = useNavigate(); // 👈 Add useNavigate for redirection
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     id: "",
@@ -24,41 +40,81 @@ export function DriverRegister() {
     licenceNumber: "",
     licenceExpiryDate: "",
     password: "",
-    profileImage: null as File | null,
+    profileImage: null as string | null,
     addressTestimony: "",
-    licenseImagePathFront: null as File | null,
-    licenseImagePathBack: null as File | null,
-    nicImagePathFront: null as File | null,
-    nicImagePathBack: null as File | null,
-    vehicleFrontPath: null as File | null,
-    vehicleRearPath: null as File | null,
-    vehicleSidePath: null as File | null,
+    licenseImagePathFront: null as string | null,
+    licenseImagePathBack: null as string | null,
+    nicImagePathFront: null as string | null,
+    nicImagePathBack: null as string | null,
+    vehicleFrontPath: null as string | null,
+    vehicleRearPath: null as string | null,
+    vehicleSidePath: null as string | null,
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
     if (files && files[0]) {
-      setFormData({ ...formData, [name]: files[0] });
+      const file = files[0];
+      const fileUrl = await uploadToImageKit(file);
+      setFormData({ ...formData, [name]: fileUrl });
     }
   };
 
   const nextStep = () => setStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
 
-    // Show popup
-    alert("Registering. Verification will complete within 48 hours.");
+    setNotificationMessage("Registration successful! Verification will complete within 48 hours.");
+    setShowNotification(true);
 
-    // Redirect to home after popup
-    navigate("/");
+    setFormData({
+      id: "",
+      driverId: "",
+      username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      vehicleType: "",
+      vehicleNo: "",
+      vehicleModel: "",
+      vehicleColor: "",
+      nicNo: "",
+      licencePlate: "",
+      licenceNumber: "",
+      licenceExpiryDate: "",
+      password: "",
+      profileImage: null,
+      addressTestimony: "",
+      licenseImagePathFront: null,
+      licenseImagePathBack: null,
+      nicImagePathFront: null,
+      nicImagePathBack: null,
+      vehicleFrontPath: null,
+      vehicleRearPath: null,
+      vehicleSidePath: null,
+    });
+
+    setTimeout(() => {
+      navigate("/");
+    }, 5000);
   };
+
+  useEffect(() => {
+    if (showNotification) {
+      const timer = setTimeout(() => {
+        setShowNotification(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showNotification]);
 
   const textFields = [
     { name: "username", label: "User Name", icon: <User /> },
@@ -102,11 +158,17 @@ export function DriverRegister() {
 
   return (
     <div className="relative min-h-screen flex mt-4 items-center justify-center py-10">
+      {showNotification && (
+        <Notification
+          message={notificationMessage}
+          onClose={() => setShowNotification(false)}
+        />
+      )}
+
       <BackgroundAnimation />
-      <div className="w-full max-w-xl bg-gradient-to-r from-yellow-100 to-blue-100 p-4 md:p-6 shadow-2xl rounded-lg">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">
-          Driver Registration
-        </h2>
+
+      <div className="w-full max-w-2xl bg-gradient-to-r from-yellow-100 to-blue-100 p-6 shadow-2xl rounded-lg">
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Driver Registration</h2>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Step 1 - Personal Info */}
@@ -117,9 +179,7 @@ export function DriverRegister() {
               )
               .map(({ name, label, icon, type = "text" }) => (
                 <div className="relative" key={name}>
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    {icon}
-                  </div>
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">{icon}</div>
                   <input
                     name={name}
                     type={type}
@@ -127,6 +187,7 @@ export function DriverRegister() {
                     value={formData[name as keyof typeof formData] as string}
                     onChange={handleChange}
                     className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                    required
                   />
                 </div>
               ))}
@@ -139,15 +200,14 @@ export function DriverRegister() {
               )
               .map(({ name, label, icon, isSelect, type = "text" }) => (
                 <div className="relative" key={name}>
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    {icon}
-                  </div>
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">{icon}</div>
                   {isSelect ? (
                     <select
                       name={name}
                       value={formData[name as keyof typeof formData] as string}
                       onChange={handleChange}
                       className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                      required
                     >
                       <option value="">Select Vehicle Type</option>
                       <option value="Car">Car</option>
@@ -164,6 +224,7 @@ export function DriverRegister() {
                       value={formData[name as keyof typeof formData] as string}
                       onChange={handleChange}
                       className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                      required
                     />
                   )}
                 </div>
@@ -173,77 +234,66 @@ export function DriverRegister() {
           {step === 3 && (
             <>
               <div className="relative col-span-full">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <IdCard />
-                </div>
-                <input
-                  name="nicNo"
-                  placeholder="NIC No"
-                  value={formData.nicNo}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
-                />
-              </div>
-
-              <div className="relative col-span-full">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <MapPin />
-                </div>
-                <input
+                <label htmlFor="addressTestimony" className="block text-gray-700 mb-2">Address Testimony</label>
+                <textarea
                   name="addressTestimony"
-                  placeholder="Address Testimony"
+                  placeholder="Provide address testimony"
                   value={formData.addressTestimony}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                  className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                  required
                 />
               </div>
             </>
           )}
 
-          {/* Step 4 - Upload Documents */}
+          {/* Step 4 - File Uploads */}
           {step === 4 && (
             <>
               {fileFields.map((field) => (
-                <div key={field} className="col-span-full">
-                  <label className="block mb-1 text-sm font-medium text-gray-600 capitalize">
-                    {fileLabels[field]}
-                  </label>
-                  <input
-                    name={field}
-                    type="file"
-                    onChange={handleFileChange}
-                    className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-pink-400"
-                  />
+                <div key={field} className="relative">
+                  <label className="block text-gray-700 mb-1">{fileLabels[field]}</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      name={field}
+                      onChange={handleFileChange}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      required
+                    />
+                    {formData[field as keyof typeof formData] && (
+                      <Upload className="text-green-500" size={20} />
+                    )}
+                  </div>
                 </div>
               ))}
             </>
           )}
 
-          {/* Step Buttons */}
-          <div className="col-span-full flex justify-between mt-4">
+          <div className="col-span-full flex justify-between mt-6">
             {step > 1 && (
               <button
                 type="button"
+                className="px-6 py-3 bg-gray-300 text-gray-700 rounded-xl"
                 onClick={prevStep}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded-xl"
               >
-                Previous
+                Back
               </button>
             )}
             {step < 4 ? (
               <button
                 type="button"
+                className="px-6 py-3 bg-blue-600 text-white rounded-xl"
                 onClick={nextStep}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-xl ml-auto"
               >
                 Next
               </button>
             ) : (
               <button
                 type="submit"
-                className="bg-yellow-500 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded-xl ml-auto"
+                className="px-6 py-3 bg-green-600 text-white rounded-xl"
               >
-                Register
+                Submit
               </button>
             )}
           </div>
