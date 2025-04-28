@@ -22,6 +22,7 @@ import VerificationsPage from './pages/VerificationsPage';
 import SettingsPage from './pages/SettingsPage';
 import { DriverProvider } from './context/DriverContext';
 import DashboardAdmin from './pages/dashboardAdmin';
+import RestaurantList from './components/RestaurantList';
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -109,6 +110,9 @@ export function App() {const [currentPath, setCurrentPath] = useState(window.loc
           <Route path="/" element={
             <>
               <Dashbord />
+              <div className="min-h-screen bg-gray-50">
+                 <RestaurantList />
+              </div>
               <Features />
               <HowItWorks />
               <Description />
