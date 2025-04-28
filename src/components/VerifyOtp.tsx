@@ -46,7 +46,7 @@ export function VerifyOtp() {
   useEffect(() => {
     if (success) {
       setTimeout(() => {
-        navigate("/");
+        navigate("/login");
       }, 2000);
     }
   }, [success, navigate]);

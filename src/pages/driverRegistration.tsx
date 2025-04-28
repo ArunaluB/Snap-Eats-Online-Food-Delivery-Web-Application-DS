@@ -1108,7 +1108,7 @@ export function DriverRegister() {
             {step > 1 && (
               <button
                 type="button"
-                className="px-6 py-3 bg-gray-300 text-gray-700 rounded-xl"
+                className="px-6 py-3 bg-gray-300 font-bold text-gray-700 rounded-xl"
                 onClick={prevStep}
               >
                 Back
@@ -1117,7 +1117,7 @@ export function DriverRegister() {
             {step < 4 ? (
               <button
                 type="button"
-                className="px-6 py-3 bg-blue-600 text-white rounded-xl"
+                className="px-6 py-3 font-bold bg-yellow-500 text-white py-3 rounded-xl hover:bg-gray-900 transition disabled:opacity-50"
                 onClick={nextStep}
               >
                 Next
@@ -1125,7 +1125,7 @@ export function DriverRegister() {
             ) : (
               <button
                 type="submit"
-                className="px-6 py-3 bg-green-600 text-white rounded-xl"
+                className="px-6 py-3 font-bold bg-yellow-500 text-white py-3 rounded-xl hover:bg-gray-900 transition disabled:opacity-50"
                 disabled={isUploading}
               >
                 Submit
