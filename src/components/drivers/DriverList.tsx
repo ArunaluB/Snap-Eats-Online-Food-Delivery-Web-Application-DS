@@ -19,10 +19,10 @@ interface Driver {
   lastName: string;
   profileImage: string;
   vehicleColor: string;
-  available: boolean; // Added missing property
-  username: string;   // Added missing property
-  password: string;   // Added missing property
-  isVerified: boolean; // Added missing property
+  available: boolean; 
+  username: string;   
+  password: string;  
+  isVerified: boolean; 
 }
 
 const DriverList: React.FC = () => {
