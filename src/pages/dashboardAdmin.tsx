@@ -1,5 +1,5 @@
 import React from 'react';
-import AppLayout from '../components/layout/AppLayout';
+import AppLayout from '../components/Layout/AppLayout';
 import StatsCard from '../components/dashboard/StatsCard';
 import { Users, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';

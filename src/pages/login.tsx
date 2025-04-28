@@ -47,7 +47,7 @@ export function Login() {
           navigate("/driver");
 
       } else if (role === "USER") {
-        navigate("/"); // Customer dashboard or homepage
+        navigate("/"); 
       } else if (role === "RESTAURANT_OWNER") {
         navigate("/restaurant");
       } else if (role === "ADMIN") {

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import AppLayout from '../components/layout/AppLayout';
 import { DataTable } from '../components/ui/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Eye, Check, X, AlertCircle, CheckCircle } from 'lucide-react';
 import { useDrivers } from '../context/DriverContext';
 import DriverDetails from '../components/drivers/DriverDetails';
+import AppLayout from '../components/Layout/AppLayout';
 
 const VerificationsPage: React.FC = () => {
   const { drivers, verifyDriver, unverifyDriver } = useDrivers();
