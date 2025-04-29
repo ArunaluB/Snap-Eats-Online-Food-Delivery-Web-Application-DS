@@ -23,6 +23,7 @@ import SettingsPage from './pages/SettingsPage';
 import { DriverProvider } from './context/DriverContext';
 import DashboardAdmin from './pages/dashboardAdmin';
 import RestaurantList from './components/RestaurantList';
+import MenuItemsTable from './restaurant/MenuItemsTable';
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -127,13 +128,14 @@ export function App() {const [currentPath, setCurrentPath] = useState(window.loc
             </EnhancedLayout>
           } />
 
-          {/* Restaurant Dashboard 
-          <Route path="/restaurant" element={<RestaurantDashboard />} />*/}
+          {/* Restaurant Dashboard */}
+          <Route path="/restaurant" element={<MenuItemsTable />} />
 
           {/* Admin Dashboard */}
-          <Route path="/admin" element={    <DriverProvider>
-      {renderPage()}
-    </DriverProvider>} />
+          <Route path="/admin" element={    
+            <DriverProvider>
+              {renderPage()}
+            </DriverProvider>} />
 
           {/* Common Pages */}
           <Route path="/orders" element={<Orders />} />
