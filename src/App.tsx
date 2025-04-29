@@ -25,6 +25,13 @@ import DashboardAdmin from './pages/dashboardAdmin';
 import RestaurantList from './components/RestaurantList';
 import MenuItemsTable from './restaurant/MenuItemsTable';
 
+//Imported new restaurant-related pages
+import RestaurantProfile from './restaurant/RestaurantProfile'; 
+import AddMenuItem from './restaurant/AddMenuItem';
+import PublicMenu from './restaurant/PublicMenu';
+import OrdersPage from './restaurant/OrdersPage';
+import MenuItemReviews from './restaurant/MenuItemReviews';
+
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [role, setRole] = useState<string | null>(null);
@@ -56,7 +63,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
     );
   }
 
-  else if (role === "ADMIN") {
+  if (role === "ADMIN") {
     return (
       <>
         <main>{children}</main>
@@ -64,7 +71,6 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Default navbar
   return (
     <>
       <Navbar />
@@ -73,23 +79,20 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function App() {const [currentPath, setCurrentPath] = useState(window.location.pathname);
+export function App() {
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
   useEffect(() => {
     const handleLocationChange = (event: CustomEvent) => {
       setCurrentPath((event as CustomEvent<{ path: string }>).detail.path);
     };
 
-    // Listen for custom location change events
     window.addEventListener('locationchange', handleLocationChange as EventListener);
-
-    // Clean up event listener
     return () => {
       window.removeEventListener('locationchange', handleLocationChange as EventListener);
     };
   }, []);
 
-  // Simple routing logic
   const renderPage = () => {
     switch (currentPath) {
       case '/drivers':
@@ -112,7 +115,7 @@ export function App() {const [currentPath, setCurrentPath] = useState(window.loc
             <>
               <Dashbord />
               <div className="min-h-screen bg-gray-50">
-                 <RestaurantList />
+                <RestaurantList />
               </div>
               <Features />
               <HowItWorks />
@@ -132,7 +135,7 @@ export function App() {const [currentPath, setCurrentPath] = useState(window.loc
           <Route path="/restaurant" element={<MenuItemsTable />} />
 
           {/* Admin Dashboard */}
-          <Route path="/admin" element={    
+          <Route path="/admin" element={
             <DriverProvider>
               {renderPage()}
             </DriverProvider>} />
@@ -147,6 +150,14 @@ export function App() {const [currentPath, setCurrentPath] = useState(window.loc
           <Route path="/customer-register" element={<CustomerRegister />} />
           <Route path="/driver-register" element={<DriverRegister />} />
           <Route path="/restaurant-register" element={<RestaurantRegister />} />
+
+          {/* ✅ Additional Restaurant Pages */}
+          <Route path="/restaurant/profile" element={<RestaurantProfile />} />
+          <Route path="/restaurant/menu" element={<AddMenuItem />} />
+          <Route path="/restaurant/viewmenus" element={<MenuItemsTable />} />
+          <Route path="/restaurant/public-menu" element={<PublicMenu />} />
+          <Route path="/restaurant/orders" element={<OrdersPage />} />
+          <Route path="/restaurant/review/:menuItemId" element={<MenuItemReviews />} />
         </Routes>
       </LayoutWrapper>
     </Router>

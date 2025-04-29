@@ -34,19 +34,23 @@ export const Navbar = () => {
 
           {/* Navigation Links */}
           <div className="flex items-center space-x-8">
-            <button onClick={() => navigate("/")} className="text-gray-700 hover:text-yellow-500 font-medium">
-              Restaurants
+            <button onClick={() => navigate("/restaurant/profile")} className="text-gray-700 hover:text-yellow-500 font-medium">
+              Profile
             </button>
-            <button onClick={() => navigate("/deals")} className="text-gray-700 hover:text-yellow-500 font-medium">
-              Deals
+            <button onClick={() => navigate("/restaurant/menu")} className="text-gray-700 hover:text-yellow-500 font-medium">
+              Add Menu
             </button>
-            <button onClick={() => navigate("/partner")} className="text-gray-700 hover:text-yellow-500 font-medium">
-              Partner with us
+            <button onClick={() => navigate("/restaurant/viewmenus")} className="text-gray-700 hover:text-yellow-500 font-medium">
+              View Menus
             </button>
-            <button onClick={() => navigate("/about")} className="text-gray-700 hover:text-yellow-500 font-medium">
-              About
+            <button onClick={() => navigate("/restaurant/public-menu")} className="text-gray-700 hover:text-yellow-500 font-medium">
+              Public Menu
+            </button>
+            <button onClick={() => navigate("/restaurant/orders")} className="text-gray-700 hover:text-yellow-500 font-medium">
+              Orders
             </button>
           </div>
+
 
           {/* Right Side */}
           <div className="flex items-center space-x-4">
