@@ -1,6 +1,6 @@
 import { Mail, Lock, User, Phone } from "lucide-react";
-import React from "react";
 import { useState, ChangeEvent } from "react";
+import BackgroundAnimation from "./BackgroundAnimation";
 
 export function RestaurantRegister() {
   const [formData, setFormData] = useState({
@@ -9,10 +9,45 @@ export function RestaurantRegister() {
     email: "",
     phone: "",
     password: "",
+    restaurantName: "",
   });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Prepare the data to send to the backend
+    const data = {
+      name: `${formData.firstName} ${formData.lastName}`,
+      email: formData.email,
+      phone: formData.phone,
+      password: formData.password,
+      restaurantName: formData.restaurantName,
+    };
+
+    try {
+      // Send data to the backend API
+      const response = await fetch('/api/restaurant-owner/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        // Redirect to dashboard or show success message
+        window.location.href = "/dashboard"; // Redirect to the dashboard
+      } else {
+        // Handle error
+        console.error("Registration failed");
+      }
+    } catch (error) {
+      console.error("Error submitting registration:", error);
+    }
+  };
 
   const fields = [
     { name: "firstName", label: "First Name", icon: <User /> },
@@ -20,21 +55,15 @@ export function RestaurantRegister() {
     { name: "email", label: "Email", icon: <Mail /> },
     { name: "phone", label: "Phone", icon: <Phone /> },
     { name: "password", label: "Password", icon: <Lock /> },
+    { name: "restaurantName", label: "Restaurant Name", icon: <User /> },
   ];
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center py-10">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D')",
-          filter: "blur(1px) brightness(0.7)",
-        }}
-      />
-      <div className="relative z-10 bg-white/70 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-full max-w-md">
+    <div className="relative max-h-screen flex items-center justify-center py-10">
+      <BackgroundAnimation />
+      <div className="w-full max-w-xl bg-gradient-to-r from-yellow-100 to-blue-100 p-4 md:p-6 justify-between items-center shadow-2xl rounded-lg">
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Restaurant Registration</h2>
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           {fields.map(({ name, label, icon }) => (
             <div className="relative" key={name}>
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">{icon}</div>
