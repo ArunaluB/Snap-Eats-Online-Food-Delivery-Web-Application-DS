@@ -1,47 +1,4 @@
-// // components/RecentOrders.jsx
-// import { PackageIcon } from 'lucide-react';
-
-// interface RecentOrdersProps {
-//   isOnline: boolean;
-//   nearbyOrders: { id: string; shop: string; distance: string; amount: string }[];
-//   handleOrderClick: (order: { id: string; shop: string; distance: string; amount: string }) => void;
-// }
-
-// export default function RecentOrders({ isOnline, nearbyOrders, handleOrderClick }: RecentOrdersProps) {
-//   return (
-//     <div className="px-4 mt-4">
-//     <div className="bg-white rounded-lg shadow">
-//       <h3 className="p-4 border-b font-semibold">Recent Orders</h3>
-//       {isOnline && nearbyOrders.length > 0 ? (
-//         <div className="divide-y">
-//           {nearbyOrders.map(order => (
-//             <div
-//               key={order.id}
-//               className="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50"
-//               onClick={() => handleOrderClick(order)}
-//             >
-//               <div>
-//                 <h4 className="font-medium">{order.shop}</h4>
-//                 <p className="text-sm text-gray-500">{order.distance}</p>
-//               </div>
-//               <span className="text-orange-500 font-medium">{order.amount}</span>
-//             </div>
-//           ))}
-//         </div>
-//       ) : (
-//         <div className="p-8 text-center text-gray-500">
-//           <PackageIcon className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-//           <p>No recent orders</p>
-//           <p className="text-sm mt-1">Go online to start receiving orders</p>
-//         </div>
-//       )}
-//     </div>
-//   </div>
-//   );
-// } 
-
-// components/RecentOrders.jsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { PackageIcon, TruckIcon, MapPinIcon, CheckCircleIcon, ArrowRightIcon } from 'lucide-react';
 
 interface RecentOrdersProps {
@@ -54,7 +11,6 @@ export default function RecentOrders({ isOnline, nearbyOrders, handleOrderClick 
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [animatedOrders, setAnimatedOrders] = useState<{ id: string; shop: string; distance: string; amount: string }[]>([]);
 
-  // Animate orders appearing when they change
   useEffect(() => {
     if (nearbyOrders.length > 0) {
       setAnimatedOrders([]);
@@ -73,21 +29,18 @@ export default function RecentOrders({ isOnline, nearbyOrders, handleOrderClick 
   return (
     <div className="px-4 mt-4">
       <div className="bg-gradient-to-br from-white to-orange-50 rounded-2xl shadow-lg border border-orange-100 overflow-hidden transition-all duration-500 hover:shadow-xl">
-        {/* Header with status indication */}
         <div className="relative">
-          {/* Background pattern */}
           <div className="absolute inset-0 opacity-10 overflow-hidden">
             <div className="absolute top-0 left-0 w-16 h-16 bg-orange-400 rounded-full -translate-x-8 -translate-y-8"></div>
             <div className="absolute top-0 right-0 w-24 h-24 bg-orange-300 rounded-full translate-x-8 -translate-y-8"></div>
           </div>
-          
+
           <div className="relative p-5 flex items-center justify-between border-b border-orange-100">
             <div className="flex items-center space-x-2">
               <PackageIcon className="h-5 w-5 text-orange-500" />
               <h3 className="font-bold text-gray-800">Recent Orders</h3>
             </div>
-            
-            {/* Status indicator */}
+
             <div className="flex items-center">
               {isOnline ? (
                 <div className="flex items-center space-x-2 bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-medium">
@@ -108,23 +61,21 @@ export default function RecentOrders({ isOnline, nearbyOrders, handleOrderClick 
             </div>
           </div>
         </div>
-        
-        {/* Content area */}
+
         {isOnline && nearbyOrders.length > 0 ? (
           <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-orange-50">
             {animatedOrders.map((order, index) => (
               <div
                 key={order.id}
                 className={`p-4 transition-all duration-300 animate-fadeIn`}
-                style={{ 
+                style={{
                   animationDelay: `${index * 100}ms`,
-                  animationFillMode: 'both' 
+                  animationFillMode: 'both'
                 }}
               >
-                <div 
-                  className={`rounded-xl p-4 cursor-pointer transition-all duration-300 hover:shadow-md ${
-                    selectedOrder === order.id ? 'bg-orange-100 shadow-md' : 'bg-white hover:bg-orange-50'
-                  }`}
+                <div
+                  className={`rounded-xl p-4 cursor-pointer transition-all duration-300 hover:shadow-md ${selectedOrder === order.id ? 'bg-orange-100 shadow-md' : 'bg-white hover:bg-orange-50'
+                    }`}
                   onClick={() => {
                     setSelectedOrder(order.id);
                     handleOrderClick(order);
@@ -136,21 +87,20 @@ export default function RecentOrders({ isOnline, nearbyOrders, handleOrderClick 
                         <TruckIcon className="h-4 w-4 text-orange-500" />
                         <h4 className="font-semibold text-gray-800">{order.shop}</h4>
                       </div>
-                      
+
                       <div className="mt-2 flex items-center text-sm text-gray-500">
                         <MapPinIcon className="h-3 w-3 mr-1 text-gray-400" />
                         <span>{order.distance}</span>
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-col items-end">
                       <span className="font-bold text-orange-500 bg-orange-50 px-3 py-1 rounded-full">
                         {order.amount}
                       </span>
-                      
-                      <button className={`mt-2 flex items-center text-xs font-medium rounded-full px-2 py-1 transition-all duration-300 ${
-                        selectedOrder === order.id ? 'bg-orange-500 text-white' : 'text-orange-500 hover:bg-orange-100'
-                      }`}>
+
+                      <button className={`mt-2 flex items-center text-xs font-medium rounded-full px-2 py-1 transition-all duration-300 ${selectedOrder === order.id ? 'bg-orange-500 text-white' : 'text-orange-500 hover:bg-orange-100'
+                        }`}>
                         <span>Details</span>
                         <ArrowRightIcon className="h-3 w-3 ml-1" />
                       </button>
@@ -162,7 +112,6 @@ export default function RecentOrders({ isOnline, nearbyOrders, handleOrderClick 
           </div>
         ) : (
           <div className="py-12 px-6 flex flex-col items-center justify-center">
-            {/* Empty state with animations */}
             <div className="relative w-24 h-24 mb-6">
               <div className="absolute inset-0 bg-orange-100 rounded-full opacity-20 animate-ping"></div>
               <div className="absolute inset-0 flex items-center justify-center">
@@ -173,15 +122,15 @@ export default function RecentOrders({ isOnline, nearbyOrders, handleOrderClick 
                 )}
               </div>
             </div>
-            
+
             <div className="text-center">
               <p className="font-semibold text-gray-700 text-lg">No recent orders</p>
               <p className="text-gray-500 mt-2 max-w-xs">
-                {isOnline ? 
-                  'Waiting for new orders to come in. You\'ll be notified when they arrive.' : 
+                {isOnline ?
+                  'Waiting for new orders to come in. You\'ll be notified when they arrive.' :
                   'You\'re currently offline. Go online to start receiving delivery requests.'}
               </p>
-              
+
               {!isOnline && (
                 <button className="mt-6 group relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-bold text-white rounded-full shadow-md bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 transition-all duration-300">
                   <span className="absolute inset-0 w-full h-full bg-gradient-to-br from-orange-500 to-orange-600"></span>
@@ -196,8 +145,7 @@ export default function RecentOrders({ isOnline, nearbyOrders, handleOrderClick 
           </div>
         )}
       </div>
-      
-      {/* Custom animations */}
+
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(8px); }

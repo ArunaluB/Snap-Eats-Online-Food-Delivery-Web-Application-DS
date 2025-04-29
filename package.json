@@ -1,5 +1,5 @@
 {
-  "name": "magic-patterns-vite-template",
+  "name": "snap-eats",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -15,8 +15,11 @@
     "@headlessui/react": "^2.2.2",
     "@react-google-maps/api": "^2.20.6",
     "@stomp/stompjs": "^7.1.1",
+    "axios": "^1.9.0",
     "framer-motion": "^12.7.3",
     "geojson": "^0.5.0",
+    "imagekit": "^6.0.0",
+    "imagekit-javascript": "^4.0.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.441.0",
     "mapbox-gl": "^3.11.0",
@@ -26,8 +29,6 @@
     "react-icons": "^5.5.0",
     "react-leaflet": "^4.2.1",
     "react-map-gl": "^7.1.9",
-    "react-router-dom": "^6.26.2",
-    "react-toastify": "^11.0.5",
     "sockjs-client": "^1.6.1",
     "three": "^0.175.0"
   },
