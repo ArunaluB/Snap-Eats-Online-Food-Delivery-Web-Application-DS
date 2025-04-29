@@ -2,7 +2,6 @@ import { Mail, Lock, User, Phone, Car, IdCard, MapPin, X, Upload } from "lucide-
 import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BackgroundAnimation from "./BackgroundAnimation";
-import { uploadToImageKit } from "./imageKit";
 
 function Notification({ message, onClose }: { message: string; onClose: () => void }) {
   return (
@@ -302,3 +301,7 @@ export function DriverRegister() {
     </div>
   );
 }
+function uploadToImageKit(file: File) {
+  throw new Error("Function not implemented.");
+}
+

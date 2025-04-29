@@ -1,6 +1,4 @@
-// imageKit.js
-
-import ImageKit from 'imagekit';
+import ImageKit from 'imagekit-javascript';
 
 const imageKit = new ImageKit({
   publicKey: 'public_pPSo4kEfBmsTnZsqw24ukoa9xa0=',
