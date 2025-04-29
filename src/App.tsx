@@ -31,6 +31,7 @@ import AddMenuItem from './restaurant/AddMenuItem';
 import PublicMenu from './restaurant/PublicMenu';
 import OrdersPage from './restaurant/OrdersPage';
 import MenuItemReviews from './restaurant/MenuItemReviews';
+import { VerifyOtp } from './components/VerifyOtp';
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -148,6 +149,7 @@ export function App() {
           {/* Auth Pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/customer-register" element={<CustomerRegister />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/driver-register" element={<DriverRegister />} />
           <Route path="/restaurant-register" element={<RestaurantRegister />} />
 

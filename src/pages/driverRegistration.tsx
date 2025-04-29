@@ -69,51 +69,70 @@ export function DriverRegister() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
-
-    setNotificationMessage("Registration successful! Verification will complete within 48 hours.");
-    setShowNotification(true);
-
-    setFormData({
-      id: "",
-      driverId: "",
-      username: "",
-      firstName: "",
-      lastName: "",
-      email: "",
-      phoneNumber: "",
-      vehicleType: "",
-      vehicleNo: "",
-      vehicleModel: "",
-      vehicleColor: "",
-      nicNo: "",
-      licencePlate: "",
-      licenceNumber: "",
-      licenceExpiryDate: "",
-      password: "",
-      profileImage: null,
-      addressTestimony: "",
-      licenseImagePathFront: null,
-      licenseImagePathBack: null,
-      nicImagePathFront: null,
-      nicImagePathBack: null,
-      vehicleFrontPath: null,
-      vehicleRearPath: null,
-      vehicleSidePath: null,
-    });
-
-    setTimeout(() => {
-      navigate("/");
-    }, 5000);
-  };
-
-  useEffect(() => {
-    if (showNotification) {
-      const timer = setTimeout(() => {
-        setShowNotification(false);
-      }, 5000);
-      return () => clearTimeout(timer);
+  
+    const apiUrl = "http://localhost:8092/api/usermanager/api/driver/register"; 
+  
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Success:", data);
+  
+        setNotificationMessage("Registration successful! Verification will complete within 48 hours.");
+        setShowNotification(true);
+  
+        // Clear form fields
+        setFormData({
+          id: "",
+          driverId: "",
+          username: "",
+          firstName: "",
+          lastName: "",
+          email: "",
+          phoneNumber: "",
+          vehicleType: "",
+          vehicleNo: "",
+          vehicleModel: "",
+          vehicleColor: "",
+          nicNo: "",
+          licencePlate: "",
+          licenceNumber: "",
+          licenceExpiryDate: "",
+          password: "",
+          profileImage: null,
+          addressTestimony: "",
+          licenseImagePathFront: null,
+          licenseImagePathBack: null,
+          nicImagePathFront: null,
+          nicImagePathBack: null,
+          vehicleFrontPath: null,
+          vehicleRearPath: null,
+          vehicleSidePath: null,
+        });
+  
+        // Redirect after delay
+        setTimeout(() => {
+          navigate("/");
+        }, 5000);
+      } else {
+        const errorData = await response.json();
+        console.error("Registration failed:", errorData);
+        setNotificationMessage("Registration failed. Please check your inputs.");
+        setShowNotification(true);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setNotificationMessage("An error occurred during registration.");
+      setShowNotification(true);
     }
-  }, [showNotification]);
+  };  
 
   const textFields = [
     { name: "username", label: "User Name", icon: <User /> },
@@ -304,4 +323,3 @@ export function DriverRegister() {
 function uploadToImageKit(file: File) {
   throw new Error("Function not implemented.");
 }
-

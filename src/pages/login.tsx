@@ -17,14 +17,21 @@ export function Login() {
     e.preventDefault();
     setLoading(true);
     setError("");
-  
+
     try {
-      const response = await axios.post("http://localhost:8080/api/usermanager/api/auth/login", formData);
+      
+      // In your form submission, ensure `identifier` is sent as `username`
+      const response = await axios.post("http://localhost:8092/api/usermanager/api/auth/login", {
+        username: formData.identifier,  // Change this line
+        password: formData.password,
+      });
       
       const { token, user } = response.data;
-  
+
+      // Store the token in localStorage
       localStorage.setItem("token", token);
-  
+
+      // Redirect based on the user's role
       if (user.role === "DRIVER") {
         if (user.isVerified) {
           navigate("/driver");
@@ -32,7 +39,7 @@ export function Login() {
           setError("Your driver account is not verified yet.");
         }
       } else if (user.role === "CUSTOMER") {
-        navigate("/");
+        navigate("/"); // Customer dashboard or homepage
       } else if (user.role === "RESTAURANT_OWNER") {
         navigate("/restaurant");
       } else if (user.role === "ADMIN") {
@@ -40,13 +47,13 @@ export function Login() {
       } else {
         setError("Unknown role. Please contact support.");
       }
-  
+
     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed. Try again.");
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   return (
     <div className="relative max-h-screen flex items-center justify-center py-10">
@@ -94,7 +101,7 @@ export function Login() {
 
         <p className="text-center text-sm text-gray-500 mt-4">
           Don’t have an account?{" "}
-          <a href="#" className="text-violet-600 font-medium">
+          <a href="http://localhost:5173/customer-register" className="text-violet-600 font-medium">
             Sign up
           </a>
         </p>
