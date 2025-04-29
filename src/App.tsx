@@ -2,7 +2,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Dashboard from './pages/Dashboard';
-import { Orders } from './pages/Orders';
+import Orders from './pages/Orders';
 import { Profile } from './pages/Profile';
 import Earnings from './pages/Earnings';
 import { Navbar } from './components/Navbar';

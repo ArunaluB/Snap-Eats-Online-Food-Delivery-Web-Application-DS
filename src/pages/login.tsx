@@ -17,19 +17,22 @@ export function Login() {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+  
     try {
-      const response = await axios.post("http://localhost:8080/api/auth/login", formData);
+      const response = await axios.post("http://localhost:8080/api/usermanager/api/auth/login", formData);
       
-      // assuming backend returns: { token, user: { role: 'ADMIN' | 'DRIVER' | 'CUSTOMER' | 'RESTAURANT_OWNER' } }
       const { token, user } = response.data;
-      
-      localStorage.setItem("token", token); // optional: save token
-
-      if (user.role === "CUSTOMER") {
+  
+      localStorage.setItem("token", token);
+  
+      if (user.role === "DRIVER") {
+        if (user.isVerified) {
+          navigate("/driver");
+        } else {
+          setError("Your driver account is not verified yet.");
+        }
+      } else if (user.role === "CUSTOMER") {
         navigate("/");
-      } else if (user.role === "DRIVER") {
-        navigate("/driver");
       } else if (user.role === "RESTAURANT_OWNER") {
         navigate("/restaurant");
       } else if (user.role === "ADMIN") {
@@ -37,13 +40,13 @@ export function Login() {
       } else {
         setError("Unknown role. Please contact support.");
       }
-
+  
     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed. Try again.");
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   return (
     <div className="relative max-h-screen flex items-center justify-center py-10">

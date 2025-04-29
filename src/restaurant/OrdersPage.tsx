@@ -1,8 +1,88 @@
 import { useEffect, useState } from 'react';
-import FilterBar from "./FilterBar";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaCheck, FaTruck, FaTimes } from 'react-icons/fa';
+import FilterBar from '../restaurant/FilterBar'; // Optional if used for tabs/search
+
+// Mock order data
+const mockOrders = [
+  {
+    id: "order1001",
+    userId: "Alice Perera",
+    items: [
+      {
+        itemId: "item1",
+        itemName: "Chicken Biryani",
+        quantity: 2,
+        unitPrice: 850,
+        totalPrice: 1700,
+        customizations: ["Extra spicy", "No onions"],
+      },
+      {
+        itemId: "item2",
+        itemName: "Mango Lassi",
+        quantity: 2,
+        unitPrice: 250,
+        totalPrice: 500,
+        customizations: ["Less sugar"],
+      }
+    ],
+    createdAt: new Date().toISOString(),
+    deliveryAddress: { city: "Kandy" },
+    orderStatus: "PENDING",
+  },
+  {
+    id: "order1002",
+    userId: "Saman Fernando",
+    items: [
+      {
+        itemId: "item3",
+        itemName: "Vegetable Kottu",
+        quantity: 1,
+        unitPrice: 650,
+        totalPrice: 650,
+        customizations: ["Add cheese"],
+      },
+    ],
+    createdAt: new Date(Date.now() - 3600000).toISOString(),
+    deliveryAddress: { city: "Colombo" },
+    orderStatus: "CONFIRMED",
+  },
+  {
+    id: "order1003",
+    userId: "Nimal de Silva",
+    items: [
+      {
+        itemId: "item4",
+        itemName: "Prawn Curry",
+        quantity: 1,
+        unitPrice: 950,
+        totalPrice: 950,
+        customizations: [],
+      },
+      {
+        itemId: "item5",
+        itemName: "Plain Rice",
+        quantity: 2,
+        unitPrice: 150,
+        totalPrice: 300,
+        customizations: [],
+      }
+    ],
+    createdAt: new Date(Date.now() - 7200000).toISOString(),
+    deliveryAddress: { city: "Galle" },
+    orderStatus: "PENDING",
+  }
+];
+
+// Mock image map
+const mockImageMap = {
+  "item1": "https://via.placeholder.com/150?text=Biryani",
+  "item2": "https://via.placeholder.com/150?text=Lassi",
+  "item3": "https://via.placeholder.com/150?text=Kottu",
+  "item4": "https://via.placeholder.com/150?text=Curry",
+  "item5": "https://via.placeholder.com/150?text=Rice"
+};
 
 interface OrderItem {
   id: string;
@@ -20,11 +100,6 @@ interface OrderItem {
   orderStatus: string;
 }
 
-interface MenuItem {
-  id: string;
-  imageUrls: string[];
-}
-
 export default function OrdersPage() {
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [imageMap, setImageMap] = useState<Record<string, string>>({});
@@ -33,346 +108,136 @@ export default function OrdersPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchOrdersAndMenu = async () => {
-      try {
-        setIsLoading(true);
-        const [ordersRes, menuRes] = await Promise.all([
-          fetch('http://localhost:8222/order-service/api/orders/restaurant/67fde55233027910028186e3'),
-          fetch('http://localhost:8222/restaurant-service/api/menu-items/restaurant/67fde55233027910028186e3')
-        ]);
-
-        if (!ordersRes.ok) {
-          const errorData = await ordersRes.json();
-          console.error('Orders Error Response:', errorData);
-          throw new Error(`Failed to fetch orders: ${errorData.error || 'Unknown error'}`);
-        }
-
-        if (!menuRes.ok) {
-          throw new Error('Failed to fetch menu items');
-        }
-
-        const ordersData = await ordersRes.json();
-        console.log('Orders Data:', ordersData);
-        const menuData: MenuItem[] = await menuRes.json();
-
-        // Handle nested orderStatus
-        setOrders(ordersData.map((order: any) => ({
-          ...order,
-          orderStatus: typeof order.orderStatus === 'object' ? order.orderStatus.orderStatus : order.orderStatus,
-        })));
-
-        const map: Record<string, string> = {};
-        menuData.forEach((item) => {
-          map[item.id] = item.imageUrls?.[0] || '';
-        });
-
-        setImageMap(map);
-      } catch (error: any) {
-        toast.error(error.message || 'Error fetching orders or menu items');
-      } finally {
+    const loadMockData = () => {
+      setTimeout(() => {
+        setOrders(mockOrders);
+        setImageMap(mockImageMap);
         setIsLoading(false);
-      }
+      }, 800);
     };
-
-    fetchOrdersAndMenu();
+    loadMockData();
   }, []);
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      const response = await fetch(
-        `http://localhost:8222/order-service/api/orders/${orderId}/status/${newStatus}`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      if (!response.ok) {
-        throw new Error('Failed to update status');
+      const order = orders.find((o) => o.id === orderId);
+      if (!order) throw new Error('Order not found');
+
+      if (newStatus === 'READY_FOR_PICKUP') {
+        const payload = {
+          orderId: order.id,
+          customerName: order.userId,
+          customerPhone: "+94712345678",
+          shop: "Spicy Kitchen",
+          shopLat: 6.870012,
+          shopLng: 79.891234,
+          customerAddress: order.deliveryAddress.city,
+          customerLat: 7.290572,
+          customerLng: 80.633728,
+          amount: order.items.reduce((total, item) => total + item.totalPrice, 0),
+          items: order.items.reduce((acc, item) => {
+            acc[item.itemName] = item.quantity;
+            return acc;
+          }, {} as Record<string, number>)
+        };
+
+        console.log("Sending to driver manager API:", payload);
+        await new Promise(resolve => setTimeout(resolve, 800));
+        toast.success('Driver manager notified successfully');
       }
 
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
+      setOrders(prev =>
+        prev.map(order =>
           order.id === orderId ? { ...order, orderStatus: newStatus } : order
         )
       );
+
       toast.success(`Order status updated to ${newStatus}`);
     } catch (error) {
-      toast.error('Error updating order status');
+      const err = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Error: ${err}`);
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  // const updateOrderStatus = async (orderId: string, newStatus: string) => {
-  //   try {
-  //     // Update order status
-  //     const response = await fetch(
-  //       `http://localhost:8222/order-service/api/orders/${orderId}/status/${newStatus}`,
-  //       {
-  //         method: 'PATCH',
-  //         headers: { 'Content-Type': 'application/json' },
-  //       }
-  //     );
-  
-  //     if (!response.ok) {
-  //       throw new Error('Failed to update status');
-  //     }
-  
-  //     // If status is READY_FOR_PICKUP, call the driver manager API
-  //     if (newStatus === 'READY_FOR_PICKUP') {
-  //       const order = orders.find((o) => o.id === orderId);
-  //       if (!order) {
-  //         throw new Error('Order not found');
-  //       }
-  
-  //       // Construct the payload for the driver manager API
-  //       const payload = {
-  //         orderId: order.id,
-  //         customerName: 'Unknown Customer', // Placeholder: Replace with actual customer name if available
-  //         customerPhone: '+94771234567', // Placeholder: Replace with actual customer phone if available
-  //         shop: 'Restaurant Name', // Placeholder: Replace with actual restaurant/shop name
-  //         shopLat: 6.876773305105909, // Placeholder: Replace with actual shop coordinates
-  //         shopLng: 79.92993253878801, // Placeholder: Replace with actual shop coordinates
-  //         customerAddress: order.deliveryAddress.city, // Use city from deliveryAddress (extend if full address is available)
-  //         customerLat: 6.901923, // Placeholder: Replace with actual customer coordinates
-  //         customerLng: 79.867678, // Placeholder: Replace with actual customer coordinates
-  //         amount: order.items.reduce((total, item) => total + item.totalPrice, 0), // Calculate total amount
-  //         items: order.items.reduce((acc, item) => {
-  //           acc[item.itemName] = item.quantity;
-  //           return acc;
-  //         }, {} as Record<string, number>), // Map items to { itemName: quantity }
-  //       };
-  
-  //       // Call the driver manager API
-  //       const driverResponse = await fetch(
-  //         'http://localhost:8080/api/drivermanager/api/order',
-  //         {
-  //           method: 'POST', // Assuming POST for creating a driver order
-  //           headers: { 'Content-Type': 'application/json' },
-  //           body: JSON.stringify(payload),
-  //         }
-  //       );
-  
-  //       if (!driverResponse.ok) {
-  //         const errorData = await driverResponse.json();
-  //         throw new Error(`Failed to notify driver manager: ${errorData.error || 'Unknown error'}`);
-  //       }
-  
-  //       toast.success('Driver manager notified successfully');
-  //     }
-  
-  //     // Update local state
-  //     setOrders((prevOrders) =>
-  //       prevOrders.map((order) =>
-  //         order.id === orderId ? { ...order, orderStatus: newStatus } : order
-  //       )
-  //     );
-  //     toast.success(`Order status updated to ${newStatus}`);
-  //   } catch (error) {
-  //     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-  //     toast.error(`Error: ${errorMessage}`);
-  //   }
-  // };
 
   const handleStatusChange = (order: OrderItem, newStatus: string) => {
     const isFinalStatus = ['READY_FOR_PICKUP', 'CANCELED'].includes(newStatus);
     const confirmationMessage = isFinalStatus
       ? `Are you sure you want to set this order to ${newStatus}? This action cannot be undone.`
-      : `Set order status to ${newStatus}?`;
+      : `Do you want to update the order status to ${newStatus}?`;
 
     if (window.confirm(confirmationMessage)) {
       updateOrderStatus(order.id, newStatus);
     }
   };
 
-  const statusOptions = [
-    {
-      status: 'CONFIRMED',
-      icon: <FaCheck />,
-      color: 'bg-green-500',
-      hoverColor: 'hover:bg-green-600',
-      description: 'Confirm Order',
-    },
-    {
-      status: 'READY_FOR_PICKUP',
-      icon: <FaTruck />,
-      color: 'bg-blue-500',
-      hoverColor: 'hover:bg-blue-600',
-      description: 'Ready for Pickup',
-    },
-    {
-      status: 'CANCELED',
-      icon: <FaTimes />,
-      color: 'bg-red-500',
-      hoverColor: 'hover:bg-red-600',
-      description: 'Cancel Order',
-    },
-  ];
-
-  const filteredOrders = orders.filter((order) => {
-    const matchesTab =
-      tab === "all" ||
-      (tab === "confirmed" && order.orderStatus === "CONFIRMED") ||
-      (tab === "pending" && order.orderStatus === "PENDING");
-
-    const matchesSearch =
-      order.userId.toLowerCase().includes(search.toLowerCase()) ||
-      order.items.some(i => i.itemName.toLowerCase().includes(search.toLowerCase())) ||
-      order.deliveryAddress.city.toLowerCase().includes(search.toLowerCase());
-
-    return matchesTab && matchesSearch;
-  });
+  const filteredOrders = orders.filter(order => {
+    if (tab === "confirmed") return order.orderStatus === "CONFIRMED";
+    if (tab === "pending") return order.orderStatus === "PENDING";
+    return true;
+  }).filter(order => order.userId.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Orders</h1>
-
-      <div className="flex space-x-6 border-b mb-4">
-        <button
-          onClick={() => setTab("all")}
-          className={`pb-2 font-semibold ${tab === "all" ? "border-b-2 border-black" : "text-gray-500"}`}
-        >
-          All
-        </button>
-        <button
-          onClick={() => setTab("confirmed")}
-          className={`pb-2 font-semibold ${tab === "confirmed" ? "border-b-2 border-black" : "text-gray-500"}`}
-        >
-          Confirmed
-        </button>
-        <button
-          onClick={() => setTab("pending")}
-          className={`pb-2 font-semibold ${tab === "pending" ? "border-b-2 border-black" : "text-gray-500"}`}
-        >
-          Pending
-        </button>
+    <div className="p-4">
+      <ToastContainer />
+      <div className="flex justify-between items-center mb-4">
+        <input
+          type="text"
+          placeholder="Search by customer"
+          className="border p-2 rounded w-1/3"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <div className="space-x-2">
+          <button className={`px-4 py-2 rounded ${tab === "all" ? "bg-blue-600 text-white" : "bg-gray-200"}`} onClick={() => setTab("all")}>All</button>
+          <button className={`px-4 py-2 rounded ${tab === "confirmed" ? "bg-blue-600 text-white" : "bg-gray-200"}`} onClick={() => setTab("confirmed")}>Confirmed</button>
+          <button className={`px-4 py-2 rounded ${tab === "pending" ? "bg-blue-600 text-white" : "bg-gray-200"}`} onClick={() => setTab("pending")}>Pending</button>
+        </div>
       </div>
 
-      <FilterBar search={search} setSearch={setSearch} />
-
-      <style>{`
-        .status-ball {
-          transition: transform 0.2s, box-shadow 0.2s;
-          animation: pulse 2s infinite;
-        }
-        .status-ball:hover {
-          transform: scale(1.1);
-          box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-        }
-        @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
-          50% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-        }
-        .spinner {
-          border: 4px solid rgba(255, 255, 255, 0.3);
-          border-top: 4px solid #3b82f6;
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="spinner"></div>
-        </div>
+        <p>Loading orders...</p>
       ) : (
-        <div className="space-y-6">
-          {filteredOrders.length === 0 ? (
-            <div className="text-center text-gray-500">No orders found</div>
-          ) : (
-            filteredOrders.map((order) => (
-              <div key={order.id} className="bg-white border p-4 rounded-md shadow-md space-y-3">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="font-semibold">{order.userId}</div>
-                    <div className="text-gray-500 text-sm">{order.deliveryAddress.city}</div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="text-xs text-gray-700 border px-2 py-1 rounded-full">
-                      {order.orderStatus}
-                    </div>
-                    {['READY_FOR_PICKUP', 'CANCELED'].includes(order.orderStatus) ? (
-                      <div className="text-sm text-gray-500 italic">
-                        Status Locked
-                      </div>
-                    ) : (
-                      <div className="flex space-x-2">
-                        {statusOptions
-                          .filter((option) =>
-                            order.orderStatus === 'PENDING'
-                              ? ['CONFIRMED', 'CANCELED'].includes(option.status)
-                              : option.status === 'READY_FOR_PICKUP'
-                          )
-                          .map((option) => (
-                            <div
-                              key={option.status}
-                              className="relative group"
-                            >
-                              <button
-                                onClick={() => handleStatusChange(order, option.status)}
-                                className={`
-                                  status-ball
-                                  ${option.color} ${option.hoverColor}
-                                  w-8 h-8 rounded-full flex items-center justify-center text-white
-                                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${option.color.split('-')[1]}
-                                `}
-                                title={option.description}
-                              >
-                                {option.icon}
-                              </button>
-                              <div className="absolute top-10 left-1/2 transform -translate-x-1/2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 z-10">
-                                {option.description}
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
+        <div className="grid gap-4">
+          {filteredOrders.map((order) => (
+            <div key={order.id} className="border p-4 rounded shadow">
+              <h2 className="text-xl font-semibold mb-2">Order #{order.id}</h2>
+              <p><strong>Customer:</strong> {order.userId}</p>
+              <p><strong>City:</strong> {order.deliveryAddress.city}</p>
+              <p><strong>Status:</strong> {order.orderStatus}</p>
+              <p className="text-sm text-gray-500 mb-2">Placed on: {new Date(order.createdAt).toLocaleString()}</p>
 
-                {order.items.map((item, index) => {
-                  const imageUrl = imageMap[item.itemId] || '';
-
-                  return (
-                    <div key={index} className="flex items-center space-x-4">
-                      {imageUrl ? (
-                        <img src={imageUrl} className="w-14 h-14 object-cover rounded-md" />
-                      ) : (
-                        <div className="w-14 h-14 bg-orange-100 rounded-md flex items-center justify-center text-xl">🍔</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {order.items.map((item) => (
+                  <div key={item.itemId} className="flex items-center gap-4 border p-2 rounded">
+                    <img src={imageMap[item.itemId]} alt={item.itemName} className="w-20 h-20 object-cover rounded" />
+                    <div>
+                      <p className="font-semibold">{item.itemName}</p>
+                      <p>Qty: {item.quantity}</p>
+                      <p>Price: Rs. {item.totalPrice}</p>
+                      {item.customizations.length > 0 && (
+                        <ul className="text-sm text-gray-600 list-disc ml-4">
+                          {item.customizations.map((c, i) => <li key={i}>{c}</li>)}
+                        </ul>
                       )}
-                      <div>
-                        <div className="font-medium text-gray-800">
-                          {item.itemName} × {item.quantity}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {item.customizations.join(', ') || 'No customizations'}
-                        </div>
-                      </div>
                     </div>
-                  );
-                })}
-
-                <div className="text-sm text-gray-500">
-                  {new Date(order.createdAt).toLocaleString()}
-                </div>
-
-                <div className="flex justify-end space-x-2">
-                  <button className="bg-yellow-300 text-black px-4 py-1 rounded hover:bg-yellow-400 transition">
-                    Message
-                  </button>
-                </div>
+                  </div>
+                ))}
               </div>
-            ))
-          )}
+
+              <div className="mt-4 flex gap-2">
+                <button onClick={() => handleStatusChange(order, "CONFIRMED")} className="bg-green-600 text-white px-3 py-1 rounded flex items-center gap-2"><FaCheck /> Confirm</button>
+                <button onClick={() => handleStatusChange(order, "READY_FOR_PICKUP")} className="bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-2"><FaTruck /> Ready for Pickup</button>
+                <button onClick={() => handleStatusChange(order, "CANCELED")} className="bg-red-600 text-white px-3 py-1 rounded flex items-center gap-2"><FaTimes /> Cancel</button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
-      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }
