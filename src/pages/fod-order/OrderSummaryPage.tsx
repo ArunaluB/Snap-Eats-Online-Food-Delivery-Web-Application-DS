@@ -1,3 +1,4 @@
+
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
@@ -51,68 +52,56 @@ export const OrderSummaryPage = () => {
     fetchData();
   }, [userId]);
 
-  // Verify payment and place order
-  useEffect(() => {
-    const verifyAndPlaceOrder = async () => {
-      const params = new URLSearchParams(location.search);
-      const sessionId = params.get('sessionId');
-      if (sessionId && !processedSessionIds.has(sessionId) && cartResponse && userAddress) {
-        setIsProcessingPayment(true);
-        try {
-          const response = await axios.get(
-            `http://localhost:8222/order-service/api/payment/verify-checkout-session/${sessionId}`
-          );
-          console.log('Payment Verification Response:', response.data);
+  // Function to verify payment
+  const verifyAndPlaceOrder = async (
+    sessionId: string,
+    processedSessions: Set<string>,
+    setProcessed: React.Dispatch<React.SetStateAction<Set<string>>>,
+    setProcessing: React.Dispatch<React.SetStateAction<boolean>>,
+    navigate: (path: string, options?: { replace: boolean }) => void
+  ) => {
+    if (processedSessions.has(sessionId)) return;
 
-          if (response.data.status === 'paid') {
-            await axios.post(
-              `http://localhost:8222/order-service/api/orders`,
-              {
-                userId: userId,
-                restaurantId: cartResponse?.restaurant.id,
-                items: cartResponse?.items.map(item => ({
-                  itemId: item.menuItem.id,
-                  itemName: item.menuItem.name,
-                  quantity: item.quantity,
-                  unitPrice: Number((item.netTotalPrice / item.quantity).toFixed(2)),
-                  totalPrice: Number(item.netTotalPrice.toFixed(2)),
-                  customizations: item.customizations,
-                })),
-                deliveryFee: Number(cartResponse?.restaurant.deliveryFee.toFixed(2)) || 0,
-                taxAmount: 0,
-                deliveryAddress: {
-                  street: userAddress?.street,
-                  city: userAddress?.city,
-                  state: userAddress?.state,
-                  zipCode: userAddress?.zipCode || null,
-                  landmark: userAddress?.landmark || null,
-                  latitude: userAddress?.latitude || null,
-                  longitude: userAddress?.longitude || null,
-                },
-                orderStatus: "PENDING",
-                paymentMethod: "CARD",
-                paymentStatus: "PAID",
-                estimatedDeliveryTime: "30-40 mins",
-                paymentSessionId: sessionId,
-              }
-            );
-            setProcessedSessionIds((prev) => new Set(prev).add(sessionId));
-            toast.success("Order placed successfully!", { duration: 4000 });
-            navigate('/order-confirmation', { replace: true });
-          } else {
-            toast.error("Payment verification failed.", { duration: 4000 });
-          }
-        } catch (err: any) {
-          console.error('Payment/Order Error:', err.response?.data, err.response?.status, err.message);
-          toast.error("Failed to process payment or place order. Please try again.", { duration: 4000 });
-        } finally {
-          setIsProcessingPayment(false);
-        }
+    setProcessing(true);
+    try {
+      const response = await axios.get(
+        `http://localhost:8222/order-service/api/payment/verify-checkout-session/${sessionId}`
+      );
+      console.log('Payment Verification Response:', response.data);
+
+      if (response.data.status === 'paid' || response.data.status === 'succeeded') {
+        setProcessed((prev) => new Set(prev).add(sessionId));
+        toast.success("Order placed successfully!", { duration: 4000 });
+        navigate('/order-confirmation', { replace: true });
+      } else {
+        toast.error("Payment verification failed.", { duration: 4000 });
+        navigate(`/order-summary/${userId}`, { replace: true });
       }
-    };
+    } catch (err: any) {
+      console.error('Payment Verification Error:', err.response?.data, err.response?.status, err.message);
+      const errorMessage =
+        err.response?.data?.error || "Failed to verify payment. Please try again.";
+      toast.error(errorMessage, { duration: 4000 });
+      navigate(`/order-summary/${userId}`, { replace: true });
+    } finally {
+      setProcessing(false);
+    }
+  };
 
-    verifyAndPlaceOrder();
-  }, [location.search, processedSessionIds, cartResponse, userAddress, userId, navigate]);
+  // Trigger verifyAndPlaceOrder when sessionId is present
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const sessionId = params.get('sessionId');
+    if (sessionId && !loading) {
+      verifyAndPlaceOrder(
+        sessionId,
+        processedSessionIds,
+        setProcessedSessionIds,
+        setIsProcessingPayment,
+        navigate
+      );
+    }
+  }, [location.search, processedSessionIds, loading]);
 
   if (loading) return <Loading />;
   if (error) return <p className="p-4 text-red-500">{error}</p>;
@@ -138,25 +127,56 @@ export const OrderSummaryPage = () => {
       toast.error("Please select a location on the map.", { duration: 4000 });
       return;
     }
+    if (!cartResponse?.restaurant?.id) {
+      toast.error("Cart data is incomplete.", { duration: 4000 });
+      return;
+    }
 
     if (selectedPaymentMethod === 'card') {
       setIsRedirecting(true);
       setRedirectError(null);
       try {
-        const totalAmount = (
-          (cartResponse?.items.reduce((sum, item) => sum + item.netTotalPrice, 0) || 0) +
-          (cartResponse?.restaurant.deliveryFee || 0)
-        );
+        const totalAmount =
+          (cartResponse.items.reduce((sum, item) => sum + item.netTotalPrice, 0) || 0) +
+          (cartResponse.restaurant.deliveryFee || 0);
+        const orderDetails = {
+          userId: userId,
+          restaurantId: cartResponse.restaurant.id,
+          items: cartResponse.items.map((item) => ({
+            itemId: item.menuItem.id,
+            itemName: item.menuItem.name,
+            quantity: item.quantity,
+            unitPrice: Number((item.netTotalPrice / item.quantity).toFixed(2)),
+            totalPrice: Number(item.netTotalPrice.toFixed(2)),
+            customizations: item.customizations,
+          })),
+          deliveryFee: Number(cartResponse.restaurant.deliveryFee.toFixed(2)) || 0,
+          taxAmount: 0,
+          deliveryAddress: {
+            street: userAddress.street,
+            city: userAddress.city,
+            state: userAddress.state,
+            zipCode: userAddress.zipCode || null,
+            landmark: userAddress.landmark || null,
+            latitude: userAddress.latitude || null,
+            longitude: userAddress.longitude || null,
+          },
+          orderStatus: "PENDING",
+          paymentMethod: "CARD",
+          paymentStatus: "PENDING",
+          estimatedDeliveryTime: "30-40 mins",
+        };
         const response = await axios.post(
           'http://localhost:8222/order-service/api/payment/create-checkout-session',
           {
             amount: Math.round(totalAmount * 100),
             currency: 'usd',
-            description: `Order for ${cartResponse?.restaurant.name || 'Restaurant'}`,
+            description: `Order for ${cartResponse.restaurant.name || 'Restaurant'}`,
             userId: userId,
-            restaurantId: cartResponse?.restaurant.id,
+            restaurantId: cartResponse.restaurant.id,
             successUrl: `${window.location.origin}/order-summary/${userId}?sessionId={CHECKOUT_SESSION_ID}`,
             cancelUrl: `${window.location.origin}/order-summary/${userId}`,
+            orderDetails,
           }
         );
         console.log('Create Checkout Session Response:', response.data);
@@ -181,40 +201,36 @@ export const OrderSummaryPage = () => {
 
   const handleConfirmCashOrder = async () => {
     try {
-      const totalAmount = (
+      const totalAmount =
         (cartResponse?.items.reduce((sum, item) => sum + item.netTotalPrice, 0) || 0) +
-        (cartResponse?.restaurant.deliveryFee || 0)
-      );
-      await axios.post(
-        `http://localhost:8222/order-service/api/orders`,
-        {
-          userId: userId,
-          restaurantId: cartResponse?.restaurant.id,
-          items: cartResponse?.items.map(item => ({
-            itemId: item.menuItem.id,
-            itemName: item.menuItem.name,
-            quantity: item.quantity,
-            unitPrice: Number((item.netTotalPrice / item.quantity).toFixed(2)),
-            totalPrice: Number(item.netTotalPrice.toFixed(2)),
-            customizations: item.customizations,
-          })),
-          deliveryFee: Number(cartResponse?.restaurant.deliveryFee.toFixed(2)) || 0,
-          taxAmount: 0,
-          deliveryAddress: {
-            street: userAddress?.street,
-            city: userAddress?.city,
-            state: userAddress?.state,
-            zipCode: userAddress?.zipCode || null,
-            landmark: userAddress?.landmark || null,
-            latitude: userAddress?.latitude || null,
-            longitude: userAddress?.longitude || null,
-          },
-          orderStatus: "PENDING",
-          paymentMethod: "CASH",
-          paymentStatus: "PENDING",
-          estimatedDeliveryTime: "30-40 mins",
-        }
-      );
+        (cartResponse?.restaurant.deliveryFee || 0);
+      await axios.post(`http://localhost:8222/order-service/api/orders`, {
+        userId: userId,
+        restaurantId: cartResponse?.restaurant.id,
+        items: cartResponse?.items.map((item) => ({
+          itemId: item.menuItem.id,
+          itemName: item.menuItem.name,
+          quantity: item.quantity,
+          unitPrice: Number((item.netTotalPrice / item.quantity).toFixed(2)),
+          totalPrice: Number(item.netTotalPrice.toFixed(2)),
+          customizations: item.customizations,
+        })),
+        deliveryFee: Number(cartResponse?.restaurant.deliveryFee.toFixed(2)) || 0,
+        taxAmount: 0,
+        deliveryAddress: {
+          street: userAddress?.street,
+          city: userAddress?.city,
+          state: userAddress?.state,
+          zipCode: userAddress?.zipCode || null,
+          landmark: userAddress?.landmark || null,
+          latitude: userAddress?.latitude || null,
+          longitude: userAddress?.longitude || null,
+        },
+        orderStatus: "PENDING",
+        paymentMethod: "CASH",
+        paymentStatus: "PENDING",
+        estimatedDeliveryTime: "30-40 mins",
+      });
       toast.success("Order placed successfully!", { duration: 4000 });
       setShowCashConfirmationModal(false);
       navigate('/order-confirmation', { replace: true });
