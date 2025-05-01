@@ -1,9 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Cart } from './fod-order/shop/Cart';
 
 export const Navbar = () => {
   const [user, setUser] = useState<null | { name: string }>(null);
   const navigate = useNavigate();
+  const [isCartOpen, setCartOpen] = useState(false);
+  const userId = "6812588c8d71f7440689f9bd"; // Hardcoded userId as provided
+
+  const handlePendingOrders = () => {
+    navigate(`/fod-order/latest-order/${userId}`);
+  };
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -13,9 +20,9 @@ export const Navbar = () => {
   }, []);
 
   const handleSignOut = () => {
-    localStorage.removeItem('user'); 
+    localStorage.removeItem('user');
     setUser(null);
-    navigate('/'); 
+    navigate('/');
   };
 
   return (
@@ -49,6 +56,34 @@ export const Navbar = () => {
             <button onClick={() => navigate("/restaurant/orders")} className="text-gray-700 hover:text-yellow-500 font-medium">
               Orders
             </button>
+            <button onClick={() => navigate("/restaurant/shops")} className="text-gray-700 hover:text-yellow-500 font-medium">
+              Restaurants
+            </button>
+          </div>
+
+          <div className="flex items-center">
+            <div className="ml-4 relative">
+              <button
+                className="flex items-center hover:bg-gray-100 px-2 py-1 rounded-full transition-colors"
+                onClick={handlePendingOrders}
+              >
+                <span className="material-symbols-outlined text-sm mr-1">pending_actions</span>
+                <span className="text-sm font-medium">Pending Orders</span>
+              </button>
+            </div>
+
+            <div className="ml-4 relative">
+              <button
+                className="relative hover:bg-gray-100 p-2 rounded-full transition-colors"
+                onClick={() => setCartOpen(true)}
+              >
+                <span className="material-symbols-outlined">shopping_bag</span>
+                <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  1
+                </span>
+              </button>
+              {/* Next: "Add cart dropdown" */}
+            </div>
           </div>
 
           {/* Right Side */}
@@ -79,6 +114,7 @@ export const Navbar = () => {
                 </button>
               </div>
             )}
+            {isCartOpen && <Cart onClose={() => setCartOpen(false)} userId={userId} />}
           </div>
         </div>
       </div>

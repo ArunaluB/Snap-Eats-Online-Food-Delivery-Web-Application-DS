@@ -32,6 +32,10 @@ import PublicMenu from './restaurant/PublicMenu';
 import OrdersPage from './restaurant/OrdersPage';
 import MenuItemReviews from './restaurant/MenuItemReviews';
 import { VerifyOtp } from './components/VerifyOtp';
+import { ShopMainPage } from './pages/fod-order/ShopMainPage';
+import { LatestOrderPage } from './pages/fod-order/LatestOrderPage';
+import OrderSummaryPage from './pages/fod-order/OrderSummaryPage';
+import { OrderSuccessPage } from './pages/fod-order/OrderSuccessPage';
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -115,9 +119,9 @@ export function App() {
           <Route path="/" element={
             <>
               <Dashbord />
-              <div className="min-h-screen bg-gray-50">
+              {/* <div className="min-h-screen bg-gray-50">
                 <RestaurantList />
-              </div>
+              </div> */}
               <Features />
               <HowItWorks />
               <Description />
@@ -160,6 +164,14 @@ export function App() {
           <Route path="/restaurant/public-menu" element={<PublicMenu />} />
           <Route path="/restaurant/orders" element={<OrdersPage />} />
           <Route path="/restaurant/review/:menuItemId" element={<MenuItemReviews />} />
+          <Route path="/restaurant/shops" element={<RestaurantList/>} />
+
+           {/* fod-order */}
+          <Route path="/fod-order/Shop/:shopid" element={<ShopMainPage />} />
+          <Route path="/fod-order/order-summary/:userId" element={<OrderSummaryPage />} />
+          <Route path="/fod-order/order-success/:userId" element={<OrderSuccessPage />} />
+          <Route path="/fod-order/latest-order/:userId" element={<LatestOrderPage />} />
+
         </Routes>
       </LayoutWrapper>
     </Router>
