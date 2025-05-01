@@ -608,6 +608,46 @@ import toast from "react-hot-toast";
 import { AddressModel } from "../../components/fod-order/shop/AddressModel";
 import { CashOrderConfirmationModal } from "../../components/fod-order/general/CashOrderConfirmationModal";
 
+// CashOrderSuccess component (same as Success from previous response)
+const CashOrderSuccess: React.FC<{ userId: string }> = ({ userId }) => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate(`/fod-order/latest-order/${userId}`, { replace: true });
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [navigate, userId]);
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center max-w-sm w-full">
+        <div className="rounded-full h-12 w-12 bg-green-100 flex items-center justify-center">
+          <svg
+            className="h-8 w-8 text-green-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M5 13l4 4L19 7"
+            ></path>
+          </svg>
+        </div>
+        <h2 className="mt-4 text-lg font-semibold text-gray-800">Order Placed Successfully!</h2>
+        <p className="mt-2 text-sm text-gray-500 text-center">
+          Your order has been received. Redirecting to your latest order...
+        </p>
+      </div>
+    </div>
+  );
+};
+
 export const OrderSummaryPage = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
@@ -622,6 +662,7 @@ export const OrderSummaryPage = () => {
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [userAddress, setUserAddress] = useState<AddressDTO | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"snap" | "cash" | "card">("cash");
+  const [showCashOrderSuccess, setShowCashOrderSuccess] = useState(false);
 
   // Fetch cart and user address
   useEffect(() => {
@@ -645,7 +686,13 @@ export const OrderSummaryPage = () => {
       }
     };
 
-    fetchData();
+    if (userId) {
+      fetchData();
+    } else {
+      setError("User ID is missing.");
+      setLoading(false);
+      toast.error("User ID is missing.", { duration: 4000 });
+    }
   }, [userId]);
 
   function GetShopAddress(address: AddressDTO): string {
@@ -654,6 +701,51 @@ export const OrderSummaryPage = () => {
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  const handleConfirmCashOrder = async () => {
+    if (!cartResponse || !userAddress) {
+      toast.error("Cart or address data is missing.", { duration: 4000 });
+      return;
+    }
+    try {
+      const totalAmount =
+        (cartResponse.items.reduce((sum, item) => sum + item.netTotalPrice, 0) || 0) +
+        (cartResponse.restaurant.deliveryFee || 0);
+      await axios.post(`http://localhost:8222/order-service/api/orders`, {
+        userId,
+        restaurantId: cartResponse.restaurant.id,
+        items: cartResponse.items.map((item) => ({
+          itemId: item.menuItem.id,
+          itemName: item.menuItem.name,
+          quantity: item.quantity,
+          unitPrice: Number((item.netTotalPrice / item.quantity).toFixed(2)),
+          totalPrice: Number(item.netTotalPrice.toFixed(2)),
+          customizations: item.customizations,
+        })),
+        deliveryFee: Number(cartResponse.restaurant.deliveryFee.toFixed(2)) || 0,
+        taxAmount: 0,
+        deliveryAddress: {
+          street: userAddress.street,
+          city: userAddress.city,
+          state: userAddress.state,
+          zipCode: userAddress.zipCode || null,
+          landmark: userAddress.landmark || null,
+          latitude: userAddress.latitude || null,
+          longitude: userAddress.longitude || null,
+        },
+        orderStatus: "PENDING",
+        paymentMethod: "CASH",
+        paymentStatus: "PENDING",
+        estimatedDeliveryTime: "30-40 mins",
+      });
+      toast.success("Order placed successfully!", { duration: 4000 });
+      setShowCashConfirmationModal(false);
+      setShowCashOrderSuccess(true); // Show the CashOrderSuccess component
+    } catch (err: any) {
+      console.error('Cash Order Error:', err.response?.data, err.response?.status, err.message);
+      toast.error("Failed to place order. Please try again.", { duration: 4000 });
+    }
   };
 
   const handleNext = async () => {
@@ -713,29 +805,28 @@ export const OrderSummaryPage = () => {
         const totalAmount =
           (cartResponse.items.reduce((sum, item) => sum + item.netTotalPrice, 0) || 0) +
           (cartResponse.restaurant.deliveryFee || 0);
-        // Store order details in localStorage
         localStorage.setItem('orderDetails', JSON.stringify(orderDetails));
-        console.log("put order details to context and localStorage", orderDetails);
-        // const response = await axios.post(
-        //   'http://localhost:8222/order-service/api/payment/create-checkout-session',
-        //   {
-        //     amount: Math.round(totalAmount * 100),
-        //     currency: 'usd',
-        //     description: `Order for ${cartResponse.restaurant.name || 'Restaurant'}`,
-        //     userId,
-        //     restaurantId: cartResponse.restaurant.id,
-        //     successUrl: `${window.location.origin}/fod-order/order-success/${userId}?sessionId={CHECKOUT_SESSION_ID}`,
-        //     cancelUrl: `${window.location.origin}/fod-order/order-summary/${userId}`,
-        //     orderDetails,
-        //   }
-        // );
-        // console.log('Create Checkout Session Response:', response.data);
-        // if (!response.data.sessionUrl) {
-        //   throw new Error('No session URL returned from backend');
-        // }
-        // window.location.href = response.data.sessionUrl;
+        console.log("Stored order details in localStorage", orderDetails);
+        const response = await axios.post(
+          'http://localhost:8222/order-service/api/payment/create-checkout-session',
+          {
+            amount: Math.round(totalAmount * 100),
+            currency: 'usd',
+            description: `Order for ${cartResponse.restaurant.name || 'Restaurant'}`,
+            userId,
+            restaurantId: cartResponse.restaurant.id,
+            successUrl: `${window.location.origin}/fod-order/order-success/${userId}?sessionId={CHECKOUT_SESSION_ID}`,
+            cancelUrl: `${window.location.origin}/fod-order/order-summary/${userId}`,
+            orderDetails,
+          }
+        );
+        console.log('Create Checkout Session Response:', response.data);
+        if (!response.data.sessionUrl) {
+          throw new Error('No session URL returned from backend');
+        }
+        window.location.href = response.data.sessionUrl;
       } catch (err: any) {
-        const errorMessage = err.response?.data?.error || err.message || 'Failed to initiate checkout. Please try again.';
+        const errorMessage = err.response?.data?.error || err.message || "Failed to initiate checkout. Please try again.";
         console.error('Checkout Error:', err.response?.data, err.response?.status, err.message);
         setRedirectError(errorMessage);
         toast.error(errorMessage, { duration: 4000 });
@@ -746,51 +837,6 @@ export const OrderSummaryPage = () => {
       setShowCashConfirmationModal(true);
     } else {
       toast.error("Selected payment method is not yet implemented.", { duration: 4000 });
-    }
-  };
-
-  const handleConfirmCashOrder = async () => {
-    if (!cartResponse || !userAddress) {
-      toast.error("Cart or address data is missing.", { duration: 4000 });
-      return;
-    }
-    try {
-      const totalAmount =
-        (cartResponse.items.reduce((sum, item) => sum + item.netTotalPrice, 0) || 0) +
-        (cartResponse.restaurant.deliveryFee || 0);
-      await axios.post(`http://localhost:8222/order-service/api/orders`, {
-        userId,
-        restaurantId: cartResponse.restaurant.id,
-        items: cartResponse.items.map((item) => ({
-          itemId: item.menuItem.id,
-          itemName: item.menuItem.name,
-          quantity: item.quantity,
-          unitPrice: Number((item.netTotalPrice / item.quantity).toFixed(2)),
-          totalPrice: Number(item.netTotalPrice.toFixed(2)),
-          customizations: item.customizations,
-        })),
-        deliveryFee: Number(cartResponse.restaurant.deliveryFee.toFixed(2)) || 0,
-        taxAmount: 0,
-        deliveryAddress: {
-          street: userAddress.street,
-          city: userAddress.city,
-          state: userAddress.state,
-          zipCode: userAddress.zipCode || null,
-          landmark: userAddress.landmark || null,
-          latitude: userAddress.latitude || null,
-          longitude: userAddress.longitude || null,
-        },
-        orderStatus: "PENDING",
-        paymentMethod: "CASH",
-        paymentStatus: "PENDING",
-        estimatedDeliveryTime: "30-40 mins",
-      });
-      toast.success("Order placed successfully!", { duration: 4000 });
-      setShowCashConfirmationModal(false);
-      navigate('/fod-order/order-confirmation', { replace: true });
-    } catch (err: any) {
-      console.error('Cash Order Error:', err.response?.data, err.response?.status, err.message);
-      toast.error("Failed to place order. Please try again.", { duration: 4000 });
     }
   };
 
@@ -1013,7 +1059,7 @@ export const OrderSummaryPage = () => {
               </div>
               <div className="w-16 h-16">
                 <img
-                  src="https://cdn.iconscout.com/icon/premium/png-256-thumb/burger-3296982-2748306.png"
+                  src="https://cdn.iconscLICout.com/icon/premium/png-256-thumb/burger-3296982-2748306.png"
                   alt="Promo"
                   className="w-full h-full object-contain"
                 />
@@ -1046,30 +1092,30 @@ export const OrderSummaryPage = () => {
                 </div>
                 {isExpanded && (
                   <div className="p-4 space-y-4">
-                  {cartResponse.items.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-14 h-14 bg-gray-100 rounded-md overflow-hidden">
-                          <img
-                            src={item.menuItem.imageUrls[0] || 'https://via.placeholder.com/56'}
-                            alt={item.menuItem.name}
-                            className="w-full h-full object-contain"
-                          />
+                    {cartResponse.items.map((item, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-14 h-14 bg-gray-100 rounded-md overflow-hidden">
+                            <img
+                              src={item.menuItem.imageUrls[0] || 'https://via.placeholder.com/56'}
+                              alt={item.menuItem.name}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div>
+                            <p className="font-medium">{item.menuItem.name}</p>
+                            {item.customizations.length > 0 && (
+                              <p className="text-gray-600 text-sm">
+                                Customizations: {item.customizations.join(', ')}
+                              </p>
+                            )}
+                            <p className="text-gray-600 text-sm">LKR {item.netTotalPrice.toFixed(2)}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{item.menuItem.name}</p>
-                          {item.customizations.length > 0 && (
-                            <p className="text-gray-600 text-sm">
-                              Customizations: {item.customizations.join(', ')}
-                            </p>
-                          )}
-                          <p className="text-gray-600 text-sm">LKR {item.netTotalPrice.toFixed(2)}</p>
-                        </div>
+                        <span className="font-medium">{item.quantity}</span>
                       </div>
-                      <span className="font-medium">{item.quantity}</span>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
                 )}
               </div>
               <div className="bg-white p-4 border-t border-gray-100 mb-1">
@@ -1141,6 +1187,7 @@ export const OrderSummaryPage = () => {
                   userAddress={userAddress}
                 />
               )}
+              {showCashOrderSuccess && userId && <CashOrderSuccess userId={userId} />}
             </div>
           ) : (
             <div className="bg-white p-4 rounded-lg shadow-sm text-gray-500">
@@ -1152,3 +1199,5 @@ export const OrderSummaryPage = () => {
     </div>
   );
 };
+
+export default OrderSummaryPage;

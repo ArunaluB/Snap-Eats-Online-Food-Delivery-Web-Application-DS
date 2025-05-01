@@ -61,6 +61,7 @@ import { Profile } from './pages/Profile';
 import Earnings from './pages/Earnings';
 // import { CartProvider } from './components/fod-order/CartContext';
 import { OrderSuccessPage } from './pages/fod-order/OrderSuccessPage';
+import { LatestOrderPage } from './pages/fod-order/LatestOrderPage';
 
 export function App() {
   return (
@@ -99,6 +100,7 @@ function LayoutWrapper() {
           <Route path="/fod-order/Shop" element={<ShopMainPage />} />
           <Route path="/fod-order/order-summary/:userId" element={<OrderSummaryPage />} />
           <Route path="/fod-order/order-success/:userId" element={<OrderSuccessPage />} />
+          <Route path="/fod-order/latest-order/:userId" element={<LatestOrderPage />} />
         </Routes>
          
       </main>
