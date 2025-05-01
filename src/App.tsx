@@ -59,6 +59,8 @@ import Dashboard from './pages/Dashboard';
 import { Orders } from './pages/Orders';
 import { Profile } from './pages/Profile';
 import Earnings from './pages/Earnings';
+// import { CartProvider } from './components/fod-order/CartContext';
+import { OrderSuccessPage } from './pages/fod-order/OrderSuccessPage';
 
 export function App() {
   return (
@@ -91,11 +93,24 @@ function LayoutWrapper() {
           <Route path="/orders" element={<Orders />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/earnings" element={<Earnings />} />
+
           {/* fod-order */}
+          {/* <Route path="/fod-order/*" element={<FodOrderRoutes />} /> */}
           <Route path="/fod-order/Shop" element={<ShopMainPage />} />
           <Route path="/fod-order/order-summary/:userId" element={<OrderSummaryPage />} />
+          <Route path="/fod-order/order-success/:userId" element={<OrderSuccessPage />} />
         </Routes>
+         
       </main>
     </div>
   );
 }
+
+// const FodOrderRoutes = () => (
+//   <CartProvider>
+//     <Routes>
+//       <Route path="/order-summary/:userId" element={<OrderSummaryPage />} />
+//       <Route path="/order-success/:userId" element={<OrderSuccessPage />} />
+//     </Routes>
+//   // </CartProvider>
+// );

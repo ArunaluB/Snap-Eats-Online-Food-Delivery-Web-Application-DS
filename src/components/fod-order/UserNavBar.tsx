@@ -81,7 +81,7 @@ export const UserNavBar = () => {
                     </div>
                 </nav>
 
-                {isCartOpen && <Cart onClose={() => setCartOpen(false)} userId={"680c87816a8cc452a6a53991"} />}
+                {isCartOpen && <Cart onClose={() => setCartOpen(false)} userId={"6812588c8d71f7440689f9bd"} />}
             </div>
         </div>
     );
