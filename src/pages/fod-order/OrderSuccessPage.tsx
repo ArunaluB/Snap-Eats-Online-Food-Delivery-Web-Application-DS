@@ -109,14 +109,14 @@
 //           } catch (err) {
 //             console.error('Error parsing orderDetails from localStorage:', err);
 //             setError("Failed to load order details from storage.");
-//             toast.error("Failed to load order details from storage.", { duration: 4000 });
+//             toast.error("Failed to load order details from storage.", { duration: 3000 });
 //             setLoading(false);
 //             return;
 //           }
 //         } else {
 //           console.warn('No orderDetails found in localStorage');
 //           setError("No order details found.");
-//           toast.error("No order details found.", { duration: 4000 });
+//           toast.error("No order details found.", { duration: 3000 });
 //           setLoading(false);
 //           return;
 //         }
@@ -142,11 +142,11 @@
 //         }
 //         setOrderId(newOrderId);
 //         console.log('Order placed successfully, orderId:', newOrderId);
-//         toast.success("Order placed successfully!", { duration: 4000 });
+//         toast.success("Order placed successfully!", { duration: 3000 });
 //       } catch (err: any) {
 //         console.error('Order Placement Error:', err.response?.data, err.response?.status, err.message);
 //         setError("Failed to place order. Please try again.");
-//         toast.error("Failed to place order. Please try again.", { duration: 4000 });
+//         toast.error("Failed to place order. Please try again.", { duration: 3000 });
 //         hasPlacedOrder.current = false;
 //         setOrderPlaced(false);
 //       } finally {
@@ -170,7 +170,7 @@
 //       } catch (err: any) {
 //         console.error('Fetch Error:', err.response?.data, err.response?.status, err.message);
 //         setError(`Failed to load order details: ${err.message}`);
-//         toast.error(`Failed to load order details: ${err.message}`, { duration: 4000 });
+//         toast.error(`Failed to load order details: ${err.message}`, { duration: 3000 });
 //       }
 //     };
 
@@ -205,7 +205,7 @@
 //           status: err.response?.status,
 //         });
 //         setStatusError(`Failed to fetch order status: ${err.message}`);
-//         toast.error(`Failed to fetch order status: ${err.message}`, { duration: 4000 });
+//         toast.error(`Failed to fetch order status: ${err.message}`, { duration: 3000 });
 //       } finally {
 //         setStatusLoading(false);
 //       }
@@ -541,13 +541,13 @@ export const OrderSuccessPage = () => {
             setOrderDetails(details);
           } catch (err) {
             setError("Unable to load order details from storage.");
-            toast.error("Unable to load order details. Please view your latest order.", { duration: 4000 });
+            toast.error("Unable to load order details. Please view your latest order.", { duration: 3000 });
             setLoading(false);
             return;
           }
         } else {
           setError("No order details found.");
-          toast.error("No order details found. Please check your latest order.", { duration: 4000 });
+          toast.error("No order details found. Please check your latest order.", { duration: 3000 });
           setLoading(false);
           return;
         }
@@ -570,10 +570,10 @@ export const OrderSuccessPage = () => {
           throw new Error("Order ID not returned from server.");
         }
         setOrderId(newOrderId);
-        toast.success("Order placed successfully!", { duration: 4000 });
+        toast.success("Order placed successfully!", { duration: 3000 });
       } catch (err: any) {
         setError("Unable to place order.");
-        toast.error("Unable to place order. Please view your latest order.", { duration: 4000 });
+        toast.error("Unable to place order. Please view your latest order.", { duration: 3000 });
         hasPlacedOrder.current = false;
         setOrderPlaced(false);
       } finally {
@@ -596,7 +596,7 @@ export const OrderSuccessPage = () => {
         setUserAddress(userResponse.data.address);
       } catch (err: any) {
         setError(`Unable to load order details: ${err.message}`);
-        toast.error(`Unable to load order details. Please view your latest order: ${err.message}`, { duration: 4000 });
+        toast.error(`Unable to load order details. Please view your latest order: ${err.message}`, { duration: 3000 });
       }
     };
 
@@ -622,7 +622,7 @@ export const OrderSuccessPage = () => {
         setOrderStatus(response.data);
       } catch (err: any) {
         setStatusError(`Unable to fetch order status: ${err.message}`);
-        toast.error(`Unable to fetch order status. Please view your latest order: ${err.message}`, { duration: 4000 });
+        toast.error(`Unable to fetch order status. Please view your latest order: ${err.message}`, { duration: 3000 });
       } finally {
         setStatusLoading(false);
       }
@@ -644,7 +644,7 @@ export const OrderSuccessPage = () => {
     if (userId) {
       navigate(`/fod-order/latest-order/${userId}`); // Navigate to LatestOrderPage
     } else {
-      toast.error("User ID not available.", { duration: 4000 });
+      toast.error("User ID not available.", { duration: 3000 });
     }
   };
 

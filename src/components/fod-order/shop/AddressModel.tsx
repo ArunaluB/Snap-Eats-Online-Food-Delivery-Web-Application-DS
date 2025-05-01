@@ -55,7 +55,7 @@ export const AddressModel: React.FC<AddressModelProps> = ({ userId, onClose, onS
                     console.error('Error fetching address:', err);
                 }
                 setError('Failed to load address.');
-                toast.error('Failed to load address.', { duration: 4000 });
+                toast.error('Failed to load address.', { duration: 3000 });
             } finally {
                 setLoading(false);
             }
@@ -105,7 +105,7 @@ export const AddressModel: React.FC<AddressModelProps> = ({ userId, onClose, onS
                     },
                 }
             );
-            toast.success('Address updated successfully!', { duration: 4000 });
+            toast.success('Address updated successfully!', { duration: 3000 });
             onSave({ street: formData.street, city: formData.city });
         } catch (err) {
             if (axios.isAxiosError(err)) {
@@ -113,7 +113,7 @@ export const AddressModel: React.FC<AddressModelProps> = ({ userId, onClose, onS
             } else {
                 console.error('Error updating address:', err);
             }
-            toast.error('Failed to update address.', { duration: 4000 });
+            toast.error('Failed to update address.', { duration: 3000 });
         }
     };
 
@@ -124,7 +124,7 @@ export const AddressModel: React.FC<AddressModelProps> = ({ userId, onClose, onS
     const handleMapError = (error: any) => {
         console.error('Map error:', error);
         setMapError('Failed to load map');
-        toast.error('Failed to load map: Check token or network', { duration: 4000 });
+        toast.error('Failed to load map: Check token or network', { duration: 3000 });
     };
 
     if (loading) return <div className="p-4 text-center"><Loading /></div>;

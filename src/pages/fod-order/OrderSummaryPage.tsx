@@ -43,7 +43,7 @@
 //       } catch (err: any) {
 //         console.error('Fetch Error:', err.response?.data, err.response?.status, err.message);
 //         setError(`Failed to load cart or user address: ${err.message}`);
-//         toast.error(`Failed to load cart or user address: ${err.message}`, { duration: 4000 });
+//         toast.error(`Failed to load cart or user address: ${err.message}`, { duration: 3000 });
 //       } finally {
 //         setLoading(false);
 //       }
@@ -71,17 +71,17 @@
 
 //       if (response.data.status === 'paid' || response.data.status === 'succeeded') {
 //         setProcessed((prev) => new Set(prev).add(sessionId));
-//         toast.success("Order placed successfully!", { duration: 4000 });
+//         toast.success("Order placed successfully!", { duration: 3000 });
 //         navigate('/order-confirmation', { replace: true });
 //       } else {
-//         toast.error("Payment verification failed.", { duration: 4000 });
+//         toast.error("Payment verification failed.", { duration: 3000 });
 //         navigate(`/order-summary/${userId}`, { replace: true });
 //       }
 //     } catch (err: any) {
 //       console.error('Payment Verification Error:', err.response?.data, err.response?.status, err.message);
 //       const errorMessage =
 //         err.response?.data?.error || "Failed to verify payment. Please try again.";
-//       toast.error(errorMessage, { duration: 4000 });
+//       toast.error(errorMessage, { duration: 3000 });
 //       navigate(`/order-summary/${userId}`, { replace: true });
 //     } finally {
 //       setProcessing(false);
@@ -116,19 +116,19 @@
 
 //   const handleNext = async () => {
 //     if (!userAddress?.street) {
-//       toast.error("Please provide a street address.", { duration: 4000 });
+//       toast.error("Please provide a street address.", { duration: 3000 });
 //       return;
 //     }
 //     if (!userAddress?.city) {
-//       toast.error("Please provide a city.", { duration: 4000 });
+//       toast.error("Please provide a city.", { duration: 3000 });
 //       return;
 //     }
 //     if (!userAddress?.latitude || !userAddress?.longitude) {
-//       toast.error("Please select a location on the map.", { duration: 4000 });
+//       toast.error("Please select a location on the map.", { duration: 3000 });
 //       return;
 //     }
 //     if (!cartResponse?.restaurant?.id) {
-//       toast.error("Cart data is incomplete.", { duration: 4000 });
+//       toast.error("Cart data is incomplete.", { duration: 3000 });
 //       return;
 //     }
 
@@ -189,14 +189,14 @@
 //         const errorMessage = err.response?.data?.error || err.message || 'Failed to initiate checkout. Please try again.';
 //         console.error('Checkout Error:', err.response?.data, err.response?.status, err.message);
 //         setRedirectError(errorMessage);
-//         toast.error(errorMessage, { duration: 4000 });
+//         toast.error(errorMessage, { duration: 3000 });
 //       } finally {
 //         setIsRedirecting(false);
 //       }
 //     } else if (selectedPaymentMethod === 'cash') {
 //       setShowCashConfirmationModal(true);
 //     } else {
-//       toast.error("Selected payment method is not yet implemented.", { duration: 4000 });
+//       toast.error("Selected payment method is not yet implemented.", { duration: 3000 });
 //     }
 //   };
 
@@ -232,12 +232,12 @@
 //         paymentStatus: "PENDING",
 //         estimatedDeliveryTime: "30-40 mins",
 //       });
-//       toast.success("Order placed successfully!", { duration: 4000 });
+//       toast.success("Order placed successfully!", { duration: 3000 });
 //       setShowCashConfirmationModal(false);
 //       navigate('/order-confirmation', { replace: true });
 //     } catch (err: any) {
 //       console.error('Cash Order Error:', err.response?.data, err.response?.status, err.message);
-//       toast.error("Failed to place order. Please try again.", { duration: 4000 });
+//       toast.error("Failed to place order. Please try again.", { duration: 3000 });
 //     }
 //   };
 
@@ -406,7 +406,7 @@
 //                   })
 //                   .catch((err) => {
 //                     console.error('Error refetching address:', err.response?.data, err.response?.status, err.message);
-//                     toast.error('Failed to refresh address.', { duration: 4000 });
+//                     toast.error('Failed to refresh address.', { duration: 3000 });
 //                   });
 //               }}
 //               onSave={() => {
@@ -420,7 +420,7 @@
 //                   })
 //                   .catch((err) => {
 //                     console.error('Error refetching address:', err.response?.data, err.response?.status, err.message);
-//                     toast.error('Failed to refresh address.', { duration: 4000 });
+//                     toast.error('Failed to refresh address.', { duration: 3000 });
 //                   });
 //               }}
 //             />
@@ -680,7 +680,7 @@ export const OrderSummaryPage = () => {
       } catch (err: any) {
         console.error('Fetch Error:', err.response?.data, err.response?.status, err.message);
         setError(`Failed to load cart or user address: ${err.message}`);
-        toast.error(`Failed to load cart or user address: ${err.message}`, { duration: 4000 });
+        toast.error(`Failed to load cart or user address: ${err.message}`, { duration: 3000 });
       } finally {
         setLoading(false);
       }
@@ -691,7 +691,7 @@ export const OrderSummaryPage = () => {
     } else {
       setError("User ID is missing.");
       setLoading(false);
-      toast.error("User ID is missing.", { duration: 4000 });
+      toast.error("User ID is missing.", { duration: 3000 });
     }
   }, [userId]);
 
@@ -705,7 +705,7 @@ export const OrderSummaryPage = () => {
 
   const handleConfirmCashOrder = async () => {
     if (!cartResponse || !userAddress) {
-      toast.error("Cart or address data is missing.", { duration: 4000 });
+      toast.error("Cart or address data is missing.", { duration: 3000 });
       return;
     }
     try {
@@ -739,34 +739,34 @@ export const OrderSummaryPage = () => {
         paymentStatus: "PENDING",
         estimatedDeliveryTime: "30-40 mins",
       });
-      toast.success("Order placed successfully!", { duration: 4000 });
+      toast.success("Order placed successfully!", { duration: 3000 });
       setShowCashConfirmationModal(false);
       setShowCashOrderSuccess(true); // Show the CashOrderSuccess component
     } catch (err: any) {
       console.error('Cash Order Error:', err.response?.data, err.response?.status, err.message);
-      toast.error("Failed to place order. Please try again.", { duration: 4000 });
+      toast.error("Failed to place order. Please try again.", { duration: 3000 });
     }
   };
 
   const handleNext = async () => {
     if (!userId) {
-      toast.error("User ID is missing.", { duration: 4000 });
+      toast.error("User ID is missing.", { duration: 3000 });
       return;
     }
     if (!userAddress?.street) {
-      toast.error("Please provide a street address.", { duration: 4000 });
+      toast.error("Please provide a street address.", { duration: 3000 });
       return;
     }
     if (!userAddress?.city) {
-      toast.error("Please provide a city.", { duration: 4000 });
+      toast.error("Please provide a city.", { duration: 3000 });
       return;
     }
     if (!userAddress?.latitude || !userAddress?.longitude) {
-      toast.error("Please select a location on the map.", { duration: 4000 });
+      toast.error("Please select a location on the map.", { duration: 3000 });
       return;
     }
     if (!cartResponse?.restaurant?.id) {
-      toast.error("Cart data is incomplete.", { duration: 4000 });
+      toast.error("Cart data is incomplete.", { duration: 3000 });
       return;
     }
 
@@ -829,14 +829,14 @@ export const OrderSummaryPage = () => {
         const errorMessage = err.response?.data?.error || err.message || "Failed to initiate checkout. Please try again.";
         console.error('Checkout Error:', err.response?.data, err.response?.status, err.message);
         setRedirectError(errorMessage);
-        toast.error(errorMessage, { duration: 4000 });
+        toast.error(errorMessage, { duration: 3000 });
       } finally {
         setIsRedirecting(false);
       }
     } else if (selectedPaymentMethod === 'cash') {
       setShowCashConfirmationModal(true);
     } else {
-      toast.error("Selected payment method is not yet implemented.", { duration: 4000 });
+      toast.error("Selected payment method is not yet implemented.", { duration: 3000 });
     }
   };
 
@@ -1008,7 +1008,7 @@ export const OrderSummaryPage = () => {
                   })
                   .catch((err) => {
                     console.error('Error refetching address:', err.response?.data, err.response?.status, err.message);
-                    toast.error('Failed to refresh address.', { duration: 4000 });
+                    toast.error('Failed to refresh address.', { duration: 3000 });
                   });
               }}
               onSave={() => {
@@ -1022,7 +1022,7 @@ export const OrderSummaryPage = () => {
                   })
                   .catch((err) => {
                     console.error('Error refetching address:', err.response?.data, err.response?.status, err.message);
-                    toast.error('Failed to refresh address.', { duration: 4000 });
+                    toast.error('Failed to refresh address.', { duration: 3000 });
                   });
               }}
             />

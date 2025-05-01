@@ -232,13 +232,13 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ onClos
         },
         (error) => {
           console.error('LocationPickerModal: Error getting location:', error);
-          toast.error('Failed to get current location', { duration: 4000 });
+          toast.error('Failed to get current location', { duration: 3000 });
         },
         { enableHighAccuracy: true }
       );
     } else {
       console.error('LocationPickerModal: Geolocation not supported');
-      toast.error('Geolocation not supported by browser', { duration: 4000 });
+      toast.error('Geolocation not supported by browser', { duration: 3000 });
     }
   }, []);
 
@@ -266,7 +266,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ onClos
         },
         (error) => {
           console.error('LocationPickerModal: Error getting current location:', error);
-          toast.error('Failed to get current location', { duration: 4000 });
+          toast.error('Failed to get current location', { duration: 3000 });
         },
         { enableHighAccuracy: true }
       );
@@ -287,7 +287,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ onClos
       onSave(selectedLocation);
       onClose();
     } else {
-      toast.error('Please select a location', { duration: 4000 });
+      toast.error('Please select a location', { duration: 3000 });
     }
   };
 
@@ -298,7 +298,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ onClos
   const handleMapError = (error: any) => {
     console.error('LocationPickerModal: Map error:', error);
     setMapError('Failed to load map');
-    toast.error('Failed to load map: Check token or network', { duration: 4000 });
+    toast.error('Failed to load map: Check token or network', { duration: 3000 });
   };
 
   return (
