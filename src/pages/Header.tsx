@@ -32,8 +32,8 @@ export default function Header() {
   };
 
   return (
-    <div className="bg-gradient-to-r from-white to-blue-50 p-4 md:p-6 flex justify-between items-center shadow-md rounded-lg">
-      <div className="flex items-center space-x-3">
+<div className="bg-gradient-to-r from-yellow-100 to-blue-100 p-4 md:p-6 flex justify-between items-center shadow-2xl rounded-lg">
+  <div className="flex items-center space-x-3">
         <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center shadow-sm">
           <User className="h-6 w-6 text-blue-600" />
         </div>
