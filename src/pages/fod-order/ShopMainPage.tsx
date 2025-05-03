@@ -100,7 +100,9 @@ export const ShopMainPage: React.FC = () => {
                             message="Try Snap One free for 1 month"
                             imageUrls=""
                         />
-                        <MenuSection />
+                        <MenuSection 
+                        shopid={shopid}
+                        />
                     </div>
                 </div>
             </div>

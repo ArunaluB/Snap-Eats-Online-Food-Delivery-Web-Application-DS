@@ -244,13 +244,17 @@ export const OrderSummaryPage = () => {
             successUrl: `${window.location.origin}/fod-order/order-success/${userId}?sessionId={CHECKOUT_SESSION_ID}`,
             cancelUrl: `${window.location.origin}/fod-order/order-summary/${userId}`,
             orderDetails,
-            6812588c8d71f7440689f9bd
           }
         );
-        if (!response.data.sessionUrl) {
+        // if (!response.data.sessionUrl) {
+        //   throw new Error('No session URL returned from backend');
+        // }
+        if (response.data.sessionUrl) {
+          window.location.assign(response.data.sessionUrl);
+        } else {
           throw new Error('No session URL returned from backend');
         }
-        window.location.href = response.data.sessionUrl;
+        // window.location.href = response.data.sessionUrl;
       } catch (err: any) {
         const errorMessage = err.response?.data?.error || err.message || "Failed to initiate checkout. Please try again.";
         console.error('Checkout Error:', err.response?.data, err.response?.status, err.message);
