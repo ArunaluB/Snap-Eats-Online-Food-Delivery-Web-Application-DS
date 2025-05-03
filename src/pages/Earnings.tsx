@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { TrendingUp, Calendar, BarChart2, DollarSign, MapPin, Clock, Award, Activity } from 'lucide-react';
 import * as THREE from 'three';
+import Loading from '../components/fod-order/general/Loading';
 
 interface SummaryData {
   dailyTrips: Record<string, { tripCount: number; totalEarnings: number; totalDistance: number }>;
@@ -213,7 +214,7 @@ export default function Earnings() {
   };
 
   const getPerformanceLevel = () => {
-    if (!displayData) return 'Loading...';
+    if (!displayData) return <Loading/>;
 
     const avgEarningsPerTrip = displayData.totalEarnings / (displayData.tripCount || 1);
 

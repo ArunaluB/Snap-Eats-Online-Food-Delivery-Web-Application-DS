@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom"; // Import useParams
 import axios from "axios";
 import { HeroSection } from "../../components/fod-order/shop/HeroSection";
 import { InfoSection } from "../../components/fod-order/shop/InfoSection";
@@ -7,6 +8,8 @@ import { MenuSection } from "../../components/fod-order/shop/MenuSection";
 import { OfferSection } from "../../components/fod-order/shop/OfferSection";
 import { Footer } from "../../components/fod-order/Footer";
 import { MenuCategoriesProps } from "../../utils/fod-order-types";
+import Loading from "../../components/fod-order/general/Loading";
+import toast from "react-hot-toast";
 
 // Define the shape of restaurant data from API
 interface RestaurantResponseDTO {
@@ -32,16 +35,25 @@ interface RestaurantDetails {
 }
 
 export const ShopMainPage: React.FC = () => {
+    const { shopid } = useParams<{ shopid: string }>(); // Extract shopid from URL
     const [restaurantDetails, setRestaurantDetails] = useState<RestaurantDetails | null>(null);
     const [menuCategoriesProps, setMenuCategoriesProps] = useState<MenuCategoriesProps>({
         restaurantId: "",
         restaurantName: "",
         MenuItemCount: 0,
     });
+
     useEffect(() => {
         const fetchRestaurantDetails = async () => {
+            if (!shopid) {
+                toast.error("Invalid shop ID");
+                return;
+            }
+
             try {
-                const response = await axios.get<RestaurantResponseDTO>("http://localhost:8222/order-service/api/shops/67fde55233027910028186e3");
+                const response = await axios.get<RestaurantResponseDTO>(
+                    `http://localhost:8222/order-service/api/shops/${shopid}`
+                );
 
                 const restaurant = response.data;
 
@@ -64,30 +76,33 @@ export const ShopMainPage: React.FC = () => {
                 setRestaurantDetails(details);
             } catch (error) {
                 console.error("Failed to fetch restaurant details:", error);
+                toast.error("Failed to fetch restaurant details. Please try again later.");
             }
         };
 
         fetchRestaurantDetails();
-    }, []);
+    }, [shopid]); // Add shopid as a dependency
 
     if (!restaurantDetails) {
-        return <div>Loading...</div>;
+        return <Loading />;
     }
 
     return (
         <div id="webcrumbs">
-            <div className="bg-white w-full max-w-7xl mx-auto rounded-lg overflow-hidden">
+            <div className="bg-white w-full mx-auto rounded-lg overflow-hidden">
                 <HeroSection {...restaurantDetails} />
                 <InfoSection {...restaurantDetails} />
                 <div className="flex flex-col md:flex-row">
-                    <MenuCategories {...menuCategoriesProps}/>
+                    <MenuCategories {...menuCategoriesProps} />
                     <div className="flex-1 p-4 align-left">
                         <OfferSection
                             title="Savings and more"
                             message="Try Snap One free for 1 month"
                             imageUrls=""
                         />
-                        <MenuSection />
+                        <MenuSection 
+                        shopid={shopid}
+                        />
                     </div>
                 </div>
             </div>
