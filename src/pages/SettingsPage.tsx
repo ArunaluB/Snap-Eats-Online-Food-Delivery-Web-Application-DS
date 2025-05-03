@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AppLayout from '../components/layout/AppLayout';
+import AppLayout from '../components/Layout/AppLayout';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Save, Plus, X } from 'lucide-react';
@@ -35,7 +35,7 @@ const SettingsPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:8092/api/usermanager/api/auth/registerAdmin', {
+      const response = await fetch('http://localhost:8222/user-management-service/api/auth/registerAdmin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

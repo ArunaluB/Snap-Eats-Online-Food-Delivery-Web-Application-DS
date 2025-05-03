@@ -25,7 +25,7 @@ export function CustomerRegister() {
     setShowOtp(false); // reset
 
     try {
-      const response = await fetch("http://localhost:8092/api/usermanager/api/auth/register", {
+      const response = await fetch("http://localhost:8222/user-management-service/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
