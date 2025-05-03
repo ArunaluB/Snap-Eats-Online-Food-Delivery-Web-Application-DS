@@ -184,6 +184,8 @@ import { OrderSuccessPage } from './pages/fod-order/OrderSuccessPage';
 import DriversPage from './pages/DriversPage';
 import SettingsPage from './pages/SettingsPage';
 import VerificationsPage from './pages/VerificationsPage';
+import { AboutUsPage } from './pages/fod-order/AboutUsPage';
+import { ContactUsPage } from './pages/fod-order/ContactUsPage';
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -303,6 +305,8 @@ export function App() {
           <Route path="/fod-order/order-summary/:userId" element={<OrderSummaryPage />} />
           <Route path="/fod-order/order-success/:userId" element={<OrderSuccessPage />} />
           <Route path="/fod-order/latest-order/:userId" element={<LatestOrderPage />} />
+          <Route path="/fod-order/about-us" element={<AboutUsPage />} />
+          <Route path="/fod-order/contact-us" element={<ContactUsPage />} />
 
 
           <Route path="/" element={<Dashboard />} />

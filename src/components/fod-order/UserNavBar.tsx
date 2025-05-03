@@ -1,12 +1,22 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Cart } from "./shop/Cart";
 
 export const UserNavBar = () => {
     const [isCartOpen, setCartOpen] = useState(false);
+    const [user, setUser] = useState<null | { name: string; role: string; userId : string }>(null);
     const navigate = useNavigate();
-    const userId = "6812588c8d71f7440689f9bd"; // Hardcoded userId as provided
+
+    useEffect(() => {
+        const authData = localStorage.getItem('authData');
+        if (authData) {
+          const parsed = JSON.parse(authData);
+          setUser({ name: parsed.username, role: parsed.role, userId: parsed.id });
+        }
+      }, []);
+    
+      const userId = user?.userId; 
 
     const handlePendingOrders = () => {
         navigate(`/fod-order/latest-order/${userId}`);

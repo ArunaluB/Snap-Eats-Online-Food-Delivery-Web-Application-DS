@@ -20,6 +20,18 @@ export const CustomAddOn: React.FC<CustomAddOnProps> = ({ selectedItem, onClose 
 
     const titleRef = useRef<HTMLHeadingElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
+    const [user, setUser] = useState<null | { name: string; role: string; userId : string }>(null);
+
+
+    useEffect(() => {
+        const authData = localStorage.getItem('authData');
+        if (authData) {
+          const parsed = JSON.parse(authData);
+          setUser({ name: parsed.username, role: parsed.role, userId: parsed.id });
+        }
+      }, []);
+    
+      const userId = user?.userId; 
     
 
     const addOns = [
@@ -60,7 +72,7 @@ export const CustomAddOn: React.FC<CustomAddOnProps> = ({ selectedItem, onClose 
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "userId": "6812588c8d71f7440689f9bd",  // Replace with actual user ID
+                    "userId": `${userId}`,  // Replace with actual user ID
                 },
                 body: JSON.stringify(payload),
             });
