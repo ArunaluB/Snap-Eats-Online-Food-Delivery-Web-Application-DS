@@ -31,6 +31,7 @@ import AddMenuItem from './restaurant/AddMenuItem';
 import PublicMenu from './restaurant/PublicMenu';
 import OrdersPage from './restaurant/OrdersPage';
 import MenuItemReviews from './restaurant/MenuItemReviews';
+import RestaurantRegistration from './restaurant/RestaurantRegistration';
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -157,7 +158,7 @@ export function App() {
           <Route path="/restaurant/viewmenus" element={<MenuItemsTable />} />
           <Route path="/restaurant/public-menu" element={<PublicMenu />} />
           <Route path="/restaurant/orders" element={<OrdersPage />} />
-          <Route path="/restaurant/review/:menuItemId" element={<MenuItemReviews />} />
+          <Route path="/restaurant/reg" element={<RestaurantRegistration />} />
         </Routes>
       </LayoutWrapper>
     </Router>
