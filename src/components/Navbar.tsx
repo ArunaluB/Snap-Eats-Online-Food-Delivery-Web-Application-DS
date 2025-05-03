@@ -13,17 +13,21 @@ export const Navbar = () => {
   };
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const authData = localStorage.getItem('authData');
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      setUser({ name: parsed.username }); // or parsed.fullName if you store that
     }
   }, []);
+  
 
   const handleSignOut = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem('authData');
+    localStorage.removeItem('token');
     setUser(null);
     navigate('/');
   };
+  
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
