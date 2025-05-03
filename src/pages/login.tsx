@@ -22,7 +22,7 @@ export function Login() {
 
       // In your form submission, ensure `identifier` is sent as `username`
       const response = await axios.post(
-        "http://localhost:8092/api/usermanager/api/auth/login",
+        "http://localhost:8222/user-management-service/api/auth/login",
         {
           username: formData.username,
           password: formData.password,

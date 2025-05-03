@@ -70,7 +70,7 @@
 //     e.preventDefault();
 //     console.log("Form submitted:", formData);
   
-//     const apiUrl = "http://localhost:8092/api/usermanager/api/driver/register"; 
+//     const apiUrl = "http://localhost:8222/user-management-service/api/usermanager/api/driver/register"; 
   
 //     try {
 //       const response = await fetch(apiUrl, {
@@ -450,7 +450,7 @@
 //     e.preventDefault();
 //     console.log("Form submitted:", formData);
 
-//     const apiUrl = "http://localhost:8092/api/usermanager/api/driver/register";
+//     const apiUrl = "http://localhost:8222/user-management-service/api/usermanager/api/driver/register";
 
 //     try {
 //       const response = await fetch(apiUrl, {
@@ -856,7 +856,7 @@ export function DriverRegister() {
     e.preventDefault();
     console.log("Form submitted:", formData);
 
-    const apiUrl = "http://localhost:8092/api/usermanager/api/driver/register";
+    const apiUrl = "http://localhost:8222/user-management-service/api/driver/register";
 
     try {
       const response = await fetch(apiUrl, {
