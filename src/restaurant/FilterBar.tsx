@@ -4,11 +4,9 @@ import { ChevronDown, Search } from "lucide-react";
 interface FilterBarProps {
   search: string;
   setSearch: (val: string) => void;
-  tab: "all" | "confirmed" | "pending";  // Add this line
-  setTab: (val: "all" | "confirmed" | "pending") => void;  // Add this line
 }
 
-export default function FilterBar({ search, setSearch, tab, setTab }: FilterBarProps) {
+export default function FilterBar({ search, setSearch }: FilterBarProps) {
   return (
     <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-md shadow-sm mb-4">
       <button className="flex items-center gap-1 bg-gray-100 text-sm px-3 py-1 rounded-full">
