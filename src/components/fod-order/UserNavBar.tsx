@@ -1,12 +1,20 @@
+
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Cart } from "./shop/Cart";
 
 export const UserNavBar = () => {
     const [isCartOpen, setCartOpen] = useState(false);
+    const navigate = useNavigate();
+    const userId = "6812588c8d71f7440689f9bd"; // Hardcoded userId as provided
+
+    const handlePendingOrders = () => {
+        navigate(`/fod-order/latest-order/${userId}`);
+    };
 
     return (
         <div id="webcrumbs">
-            <div className="flex flex-col ">
+            <div className="flex flex-col">
                 <header className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
                     <div className="flex items-center gap-4">
                         <button className="hover:bg-gray-100 p-1 rounded-full transition-colors">
@@ -42,7 +50,17 @@ export const UserNavBar = () => {
                         </div>
 
                         <div className="ml-4 relative">
-                            <button 
+                            <button
+                                className="flex items-center hover:bg-gray-100 px-2 py-1 rounded-full transition-colors"
+                                onClick={handlePendingOrders}
+                            >
+                                <span className="material-symbols-outlined text-sm mr-1">pending_actions</span>
+                                <span className="text-sm font-medium">Pending Orders</span>
+                            </button>
+                        </div>
+
+                        <div className="ml-4 relative">
+                            <button
                                 className="relative hover:bg-gray-100 p-2 rounded-full transition-colors"
                                 onClick={() => setCartOpen(true)}
                             >
@@ -81,7 +99,7 @@ export const UserNavBar = () => {
                     </div>
                 </nav>
 
-                {isCartOpen && <Cart onClose={() => setCartOpen(false)} userId={"user-123"} />}
+                {isCartOpen && <Cart onClose={() => setCartOpen(false)} userId={userId} />}
             </div>
         </div>
     );

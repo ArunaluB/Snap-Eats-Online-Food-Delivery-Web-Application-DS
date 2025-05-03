@@ -44,6 +44,7 @@
 
 import React, { useEffect, useState } from "react";
 import { categoryDisplayNames, MenuCategoriesProps } from '../../../utils/fod-order-types';
+import toast from "react-hot-toast";
 
 export const MenuCategories: React.FC<MenuCategoriesProps> = ({ restaurantId, restaurantName, MenuItemCount }) => {
     const [categories, setCategories] = useState<string[]>([]);
@@ -53,7 +54,8 @@ export const MenuCategories: React.FC<MenuCategoriesProps> = ({ restaurantId, re
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch(`http://localhost:8222/order-service/api/shops/${restaurantId}/items/categories`);
+                // const response = await fetch(`http://localhost:8222/order-service/api/shops/${restaurantId}/items/categories`);
+                const response = await fetch(`http://localhost:8222/restaurant-service/api/menu-items/restaurant/${restaurantId}/categories`);
                 if (!response.ok) {
                     throw new Error("Failed to fetch categories");
                 }
@@ -61,6 +63,7 @@ export const MenuCategories: React.FC<MenuCategoriesProps> = ({ restaurantId, re
                 setCategories(data);
             } catch (err: any) {
                 setError(err.message || "An error occurred");
+                toast.error(err.message || "An error occurred while fetching categories");
             } finally {
                 setLoading(false);
             }

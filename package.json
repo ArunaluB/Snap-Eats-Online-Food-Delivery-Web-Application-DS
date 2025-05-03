@@ -1,5 +1,5 @@
 {
-  "name": "magic-patterns-vite-template",
+  "name": "snap-eats",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -12,20 +12,26 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.27.0",
     "@clerk/nextjs": "^6.14.3",
+    "@headlessui/react": "^2.2.2",
     "@react-google-maps/api": "^2.20.6",
     "@stomp/stompjs": "^7.1.1",
-    "axios": "^1.8.4",
+    "@stripe/react-stripe-js": "^3.6.0",
+    "@stripe/stripe-js": "^7.2.0",
+    "axios": "^1.9.0",
+    "cors": "^2.8.5",
     "framer-motion": "^12.7.3",
     "geojson": "^0.5.0",
+    "imagekit": "^6.0.0",
+    "imagekit-javascript": "^4.0.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.441.0",
     "mapbox-gl": "^3.11.0",
-    "maplibre-gl": "^4.7.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hot-toast": "^2.5.2",
     "react-leaflet": "^4.2.1",
     "react-map-gl": "^7.1.9",
-    "react-router-dom": "^6.26.2",
+    "react-router-dom": "^6.30.0",
     "sockjs-client": "^1.6.1",
     "three": "^0.175.0"
   },
@@ -40,7 +46,7 @@
     "@types/three": "^0.175.0",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "latest",
     "eslint": "^8.50.0",
     "eslint-plugin-react-hooks": "^4.6.0",
@@ -48,6 +54,6 @@
     "postcss": "latest",
     "tailwindcss": "3.4.17",
     "typescript": "^5.8.3",
-    "vite": "^5.2.0"
+    "vite": "^6.3.4"
   }
 }

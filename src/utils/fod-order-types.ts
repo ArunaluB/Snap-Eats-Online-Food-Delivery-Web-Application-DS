@@ -114,6 +114,22 @@ export type CuisineType =
     | 'VEGAN'
     | 'OTHER';
 
+export type OrderStatusType =
+    | 'PENDING'
+    | 'CONFIRMED'
+    | 'PREPARING'
+    | 'READY_FOR_PICKUP'
+    | 'OUT_FOR_DELIVERY'
+    | 'DELIVERED'
+    | 'CANCELED';
+
+export type PaymentStatusType =
+    | 'PENDING'
+    | 'PAID'
+    | 'FAILED'
+    | 'REFUNDED'
+    | 'CANCELED';
+
 export interface MenuCategoriesProps {
     restaurantId: string;
     restaurantName: string;
