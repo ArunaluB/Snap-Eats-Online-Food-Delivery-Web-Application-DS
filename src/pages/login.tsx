@@ -1,11 +1,11 @@
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import BackgroundAnimation from "./BackgroundAnimation";
 
 export function Login() {
-  const [formData, setFormData] = useState({ identifier: "", password: "" });
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -18,27 +18,44 @@ export function Login() {
     setLoading(true);
     setError("");
 
-    try {
-      const response = await axios.post("http://localhost:8080/api/auth/login", formData);
-      
-      // assuming backend returns: { token, user: { role: 'ADMIN' | 'DRIVER' | 'CUSTOMER' | 'RESTAURANT_OWNER' } }
-      const { token, user } = response.data;
-      
-      localStorage.setItem("token", token); // optional: save token
+    try {     
 
-      if (user.role === "CUSTOMER") {
-        navigate("/");
-      } else if (user.role === "DRIVER") {
-        navigate("/driver");
-      } else if (user.role === "RESTAURANT_OWNER") {
+      // In your form submission, ensure `identifier` is sent as `username`
+      const response = await axios.post(
+        "http://localhost:8092/api/usermanager/api/auth/login",
+        {
+          username: formData.username,
+          password: formData.password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      
+      const { token, role } = response.data;
+
+      // Save full response (user + token) to localStorage
+      localStorage.setItem("authData", JSON.stringify(response.data));
+      
+      // (Optional: still keep token separately if needed elsewhere)
+      localStorage.setItem("token", token);
+      
+      // Redirect based on the user's role
+      if (role === "DRIVER") {
+          navigate("/driver");
+
+      } else if (role === "USER") {
+        navigate("/"); 
+      } else if (role === "RESTAURANT_OWNER") {
         navigate("/restaurant");
-      } else if (user.role === "ADMIN") {
+      } else if (role === "ADMIN") {
         navigate("/admin");
       } else {
         setError("Unknown role. Please contact support.");
       }
-
-    } catch (err: any) {
+     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed. Try again.");
     } finally {
       setLoading(false);
@@ -59,15 +76,16 @@ export function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="relative mt-8">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
-              name="identifier"
+              name="username"
               type="text"
-              placeholder="Email or Phone"
+              placeholder="Username"
               onChange={handleChange}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-400 focus:outline-none"
               required
             />
+
           </div>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -91,7 +109,7 @@ export function Login() {
 
         <p className="text-center text-sm text-gray-500 mt-4">
           Don’t have an account?{" "}
-          <a href="#" className="text-violet-600 font-medium">
+          <a href="http://localhost:5173/customer-register" className="text-violet-600 font-medium">
             Sign up
           </a>
         </p>

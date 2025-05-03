@@ -6,17 +6,21 @@ export const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('driver');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const authData = localStorage.getItem('authData');
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      setUser({ name: parsed.username }); // or parsed.fullName if you store that
     }
   }, []);
+  
 
   const handleSignOut = () => {
-    localStorage.removeItem('driver');
+    localStorage.removeItem('authData');
+    localStorage.removeItem('token');
     setUser(null);
-    navigate('/login'); // Redirect to login after sign out (optional)
+    navigate('/');
   };
+  
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -51,7 +55,6 @@ export const Navbar = () => {
             </button>
           </div>
 
-
           {/* Right Side */}
           <div className="flex items-center space-x-4">
             {!user ? (
@@ -74,7 +77,7 @@ export const Navbar = () => {
                 <span className="text-gray-700 font-medium">{user.name}</span>
                 <button
                   onClick={handleSignOut}
-                  className="px-4 py-2 text-gray-700 hover:text-yellow-500 font-medium"
+                  className="px-4 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition"
                 >
                   Sign Out
                 </button>
